@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="ISO-8859-1">
+		<link rel="stylesheet" type="text/css" href="../css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="../css/ui.jqgrid.css">
+		<link rel="stylesheet" type="text/css" href="../css/pts.css">
+		
+		<script src="../js/jquery-1.11.0.min.js"></script>
+		<script src="../js/jquery-ui.min.js"></script>		
+		<script src="../js/i18n/grid.locale-en.js"></script>
+		<script src="../js/jquery.jqGrid.min.js"></script>
+		
+		
+		<script>
+			$(document).ready(function(){
+				$("#billers").click(function(e){
+					e.preventDefault();
+					$("#section").load("billers.html");
+				});
+				$("#banks").click(function(e){
+					e.preventDefault();
+					$("#section").load("banks.html");
+				});
+				$("#billtypes").click(function(e){
+					e.preventDefault();
+					$("#section").load("billtypes.html");
+				});
+				$("#billsubtypes").click(function(e){
+					e.preventDefault();
+					$("#section").load("billsubtypes.html");
+				});
+				$("#cardtypes").click(function(e){
+					e.preventDefault();
+					$("#section").load("cardtypes.html");
+				});
+				$("#statuses").click(function(e){
+					e.preventDefault();
+					$("#section").load("statuses.html");
+				});
+				$("#paymentmodes").click(function(e){
+					e.preventDefault();
+					$("#section").load("paymentmodes.html");
+				});
+				$("#cards").click(function(e){
+					e.preventDefault();
+					$("#section").load("cards.html");
+				});
+				$("#accounts").click(function(e){
+					e.preventDefault();
+					$("#section").load("accounts.html");
+				});
+				$("#bills").click(function(e){
+					e.preventDefault();
+					$("#section").load("bills.html");
+				});
+			});
+			
+		</script>
+	</head>
+	<body>
+		<div id="header">
+			<h1>Payment Tracking System</h1>
+		</div>
+		<div id="nav">
+			<a href="#" id="billers">Billers</a><br>
+			<a href="#" id="banks">Banks</a><br>
+			<a href="#" id="billtypes">Bill Types</a><br>
+			<a href="#" id="billsubtypes">Bill Sub Types</a><br>
+			<a href="#" id="cardtypes">Card Types</a><br>
+			<a href="#" id="statuses">Statuses</a><br>
+			<a href="#" id="paymentmodes">Payment Modes</a><br>
+			<a href="#" id="cards">Cards</a><br>
+			<a href="#" id="accounts">Accounts</a><br>
+			<a href="#" id="bills">Bills</a><br>
+		</div>
+		<div id="section">
+		</div>
+		<div id="footer">
+			Copyright @ pts.com
+		</div>
+	</body>
+</html>

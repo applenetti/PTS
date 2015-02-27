@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="ISO-8859-1">
+		<link rel="stylesheet" type="text/css" href="../css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="../css/ui.jqgrid.css">
+		<link rel="stylesheet" type="text/css" href="../css/pts.css">
+		
+		<script src="../js/jquery-1.11.0.min.js"></script>
+		<script src="../js/jquery-ui.min.js"></script>		
+		<script src="../js/i18n/grid.locale-en.js"></script>
+		<script src="../js/jquery.jqGrid.min.js"></script>
+		<script>
+				$("#accordion").accordion({active: 1, heightStyle: "fill"});
+				
+				$(document).ready(function () {
+					
+					$.ajax({
+						type: "GET",
+						url: "/PTS/rest/biller/billers",
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							$("#billersListForAccount").empty();
+							$.each(json, function(key, value){
+								var option = "<option value=\"" + value.id + "\">" + value.name + "</option>";
+								$("#billersListForAccount").append(option);
+							});
+						}
+					}).fail(function(e){
+						$("#billersListForAccount").empty();
+						if (e.responseText == 'Biller Type Not Found!') {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");
+							
+						} else {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");
+						}
+					});
+					
+		            $("#accountsList").jqGrid({
+		                url: '/PTS/rest/account/accounts',
+		                mtype: "GET",
+		                datatype: "json",
+		                colModel: [
+		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
+		                    { label: 'Account ID', name: 'accountId', align: 'center', editable: true, sortable: true },
+		                    { label: 'Account Number', name: 'accountNumber', align: 'center', editable: true, sortable: true },
+		                    { label: 'User Name', name: 'username', align: 'center', editable: true, sortable: true },
+		                    { label: 'Password', name: 'password', align: 'center', editable: true, sortable: true },
+		                    { label: 'Biller', name: 'name', jsonmap: 'biller.name', align: 'center', editable: true, sortable: true },
+		                    { label: '', name: 'bId', jsonmap: 'biller.id', align: 'center', editable: true, sortable: false, hidden: true }
+		                ],
+		                rowNum: 15,
+		                rowList: [10, 20, 30],
+		                viewrecords: true,
+		                loadonce: true,		                
+		                height: 360,
+		                width: 500,
+		                sortname: 'id',
+		                sortorder: 'asc',
+		                pager: '#accountsListPager',
+		                onSelectRow: function(id) {
+		                	if(id && id!==lastSel){ 
+		                        $('#accountsList').restoreRow(lastSel); 
+		                        lastSel=id; 
+		                     }
+		                     $('#accountsList').editRow(id, true); 
+		                },
+		                loadComplete: function(data) {
+		                    if ($("#accountsList").jqGrid('getGridParam','datatype') === "json") {
+		                        setTimeout(function(){
+		                        	$("#accountsList").trigger("reloadGrid");
+		                        },100);
+		                    }
+		                }
+		            });
+		            
+		            $("#accountsList").jqGrid("navGrid", "#accountsListPager", {edit:true, add:false, search: false, afterRefresh: function() {
+        					$('#accountsList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            	}}, {}, {}, {});
+
+		            $.extend($.jgrid.edit, {
+		                mtype: "PUT",
+		                closeAfterEdit: true,
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/account/update';
+		                },afterSubmit: function () {
+		            		$("#accountsList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            		return [true, '', ''];
+		            	}		                
+		            });
+		            
+		            $.extend($.jgrid.del, {
+		                mtype: "DELETE",
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/account/delete';
+		                }
+		            });
+		            
+		        });
+				$("#resetAccount").click(function(){
+					$("#accountNumber").val("");
+					$("#message").html("");
+					$("#accountNumber").focus();
+				});
+				$("#addAccount").click(function(){
+					$("#message").html("");
+					var accountId = $("#accountId").val();
+					var accountNumber = $("#accountNumber").val();
+					var username = $("#username").val();
+					var password = $("#password").val();
+					var billerId = $("#billersListForAccount option:selected").val();
+					if (accountNumber.trim() == "") {
+						$("#message").html("<font color=red>" + "Account Numnber is blank!" + " </font>");
+						return;
+					}
+					var data = {"accountId": accountId, "accountNumber": accountNumber, "username": username, "password": password, "billerId": billerId};
+					$.ajax({
+						type: "POST",
+						url: "http://localhost:8080/PTS/rest/account/create",
+						data: data,
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							if (textStatus == "success") {
+								$("#message").html("<font color=blue>" + "Account addeded successfully!" + "</font>");
+								$('#accountsList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+							}
+						}
+					});
+					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						$("#message").html("<font color=red>" + jqXHR.responseText + " </font>");
+					});
+				});
+		</script>
+</head>
+<body>
+	<div id="accordion">
+		<h3>Add Account</h3>
+		<div>		
+			<table cellspacing="5" cellpadding="5">
+				<tr>
+					<td><label for="billersListForAccount" align="right">Biller :</label></td>
+					<td align="left"><select id="billersListForAccount" style="width: 197px;"></select></td>
+				</tr>
+				<tr>
+					<td><label for="accountId" align="right">Account ID :</label></td>
+					<td align="left"><input type="text" id="accountId" /></td>
+				</tr>
+				<tr>
+					<td><label for="accountNumber" align="right">Account Number :</label></td>
+					<td align="left"><input type="text" id="accountNumber" /></td>
+				</tr>
+				<tr>
+					<td><label for="username" align="right">User Name :</label></td>
+					<td align="left"><input type="text" id="username" /></td>
+				</tr>
+				<tr>
+					<td><label for="password" align="right">Password :</label></td>
+					<td align="left"><input type="text" id="password" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button type="button" id="addAccount">Add</button><button type="button" id="resetAccount">Reset</button></td>
+				</tr>
+				<tr><td></td><td><span id="message"></span></tr>
+			</table>
+		</div>
+		<h3>List Accounts</h3>
+		<div>
+			<table id="accountsList"></table>
+			<div id="accountsListPager"></div>
+		</div>
+	</div>
+</body>
+</html>

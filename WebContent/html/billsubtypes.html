@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="ISO-8859-1">
+		<link rel="stylesheet" type="text/css" href="../css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="../css/ui.jqgrid.css">
+		<link rel="stylesheet" type="text/css" href="../css/pts.css">
+		
+		<script src="../js/jquery-1.11.0.min.js"></script>
+		<script src="../js/jquery-ui.min.js"></script>		
+		<script src="../js/i18n/grid.locale-en.js"></script>
+		<script src="../js/jquery.jqGrid.min.js"></script>
+		<script>
+				$("#accordion").accordion({active: 1, heightStyle: "fill"});
+				
+				$(document).ready(function () {
+					
+					/* $("#billType").on("input", function () {
+				        var options = {};
+				        options.url = "/PTS/rest/billtype/billtypes";
+				        options.type = "GET";
+				        options.dataType = "json";
+				        options.success = function (data) {
+				            $("#billTypesList").empty();
+				            for(var i=0;i<data.length;i++)
+				            {
+				                $("#billTypesList").append("<option value='" + 
+				                data[i].type + "' ></option>");
+				            }
+				        };
+				        $.ajax(options);
+				    }); */
+					
+					$.ajax({
+						type: "GET",
+						url: "/PTS/rest/billtype/billtypes",
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							$("#billTypes").empty();
+							$.each(json, function(key, value){
+								var option = "<option value=\"" + value.id + "\">" + value.type + "</option>";
+								$("#billTypes").append(option);
+							});
+						}
+					}).fail(function(e){
+						$("#billTypes").empty();
+						if (e.responseText == 'Bill Type Not Found!') {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");							
+						} else {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");
+						}
+					});
+					
+		            $("#billsubtypeList").jqGrid({
+		                url: '/PTS/rest/billsubtype/billsubtypes',
+		                mtype: "GET",
+		                datatype: "json",
+		                colModel: [
+		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
+		                    { label: 'Type', name: 'type', jsonmap: 'billType.type', align: 'center', editable: false, sortable: true },
+		                    { label: 'Sub Type', name: 'subType', align: 'center', editable: true, sortable: true },
+		                    { label: '', name: 'typeId', jsonmap: 'billType.id', align: 'center', editable: true, sortable: false, hidden: true }
+		                ],
+		                rowNum: 15,
+		                rowList: [10, 20, 30],
+		                viewrecords: true,
+		                loadonce: true,		                
+		                height: 360,
+		                width: 500,
+		                sortname: 'id',
+		                sortorder: 'asc',
+		                pager: '#billsubtypeListPager',
+		                onSelectRow: function(id) {
+		                	if(id && id!==lastSel){ 
+		                        $('#billsubtypeList').restoreRow(lastSel); 
+		                        lastSel=id; 
+		                     }
+		                     $('#billsubtypeList').editRow(id, true); 
+		                },
+		                loadComplete: function(data) {
+		                    if ($("#billsubtypeList").jqGrid('getGridParam','datatype') === "json") {
+		                        setTimeout(function(){
+		                        	$("#billsubtypeList").trigger("reloadGrid");
+		                        },100);
+		                    }
+		                }
+		            });
+		            
+		            $("#billsubtypeList").jqGrid("navGrid", "#billsubtypeListPager", {edit:true, add:false, search: false, afterRefresh: function() {
+        					$('#billsubtypeList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            	}}, {}, {}, {});
+
+		            $.extend($.jgrid.edit, {
+		                mtype: "PUT",
+		                closeAfterEdit: true,
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/billsubtype/update';
+		                },afterSubmit: function () {
+		            		$("#billsubtypeList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            		return [true, '', ''];
+		            	}		                
+		            });
+		            
+		            $.extend($.jgrid.del, {
+		                mtype: "DELETE",
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/billsubtype/delete';
+		                }
+		            });
+		            
+		        });
+				$("#resetBillSubType").click(function(){
+					$("#billSubType").val("");
+					$("#message").html("");
+					$("#billSubType").focus();
+				});
+				$("#addBillSubType").click(function(){
+					$("#message").html("");
+					var billType = "";
+					var billSubType = "";
+					billType = $("#billTypes option:selected").val();
+					billSubType = $("#billSubType").val();
+					if (billSubType.trim() == "") {
+						$("#message").html("<font color=red>" + "Bill Sub Type is blank!" + " </font>");
+						return;
+					}
+					var data = {"type": billType, "subType": billSubType};
+					$.ajax({
+						type: "POST",
+						url: "http://localhost:8080/PTS/rest/billsubtype/create",
+						data: data,
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							if (textStatus == "success") {
+								$("#message").html("<font color=blue>" + "Bill Sub Type addeded successfully!" + "</font>");
+								$('#billsubtypeList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+							}
+						}
+					});
+					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						if (thrownError == "Conflict") {
+							$("#message").html("<font color=red>Bill Sub Type exists!</font>");
+						} else {
+							$("#message").html("<font color=red>" + thrownError + " </font>");
+						}
+					});
+				});
+		</script>
+</head>
+<body>
+	<div id="accordion">
+		<h3>Add Bill Sub Type</h3>
+		<div>		
+			<table cellspacing="5" cellpadding="5">
+				<tr>
+					<td><label for="billType" align="right">Bill Type :</label></td>
+					<td align="left">
+						<select id="billTypes" style="width: 195px;"></select>
+					</td>
+				</tr>
+				<tr>
+					<td><label for="billSubType" align="right">Bill Sub Type :</label></td>
+					<td align="left"><input type="text" id="billSubType" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button type="button" id="addBillSubType">Add</button><button type="button" id="resetBillSubType">Reset</button></td>
+				</tr>
+				<tr><td></td><td><span id="message"></span></tr>
+			</table>
+		</div>
+		<h3>List Bill Sub Types</h3>
+		<div>
+			<table id="billsubtypeList"></table>
+			<div id="billsubtypeListPager"></div>
+		</div>
+	</div>
+</body>
+</html>

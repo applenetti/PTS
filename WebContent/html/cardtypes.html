@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="ISO-8859-1">
+		<link rel="stylesheet" type="text/css" href="../css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="../css/ui.jqgrid.css">
+		<link rel="stylesheet" type="text/css" href="../css/pts.css">
+		
+		<script src="../js/jquery-1.11.0.min.js"></script>
+		<script src="../js/jquery-ui.min.js"></script>		
+		<script src="../js/i18n/grid.locale-en.js"></script>
+		<script src="../js/jquery.jqGrid.min.js"></script>
+		<script>
+				$("#accordion").accordion({active: 1, heightStyle: "fill"});
+				
+				$(document).ready(function () {
+		            $("#cardtypeList").jqGrid({
+		                url: '/PTS/rest/cardtype/cardtypes',
+		                mtype: "GET",
+		                datatype: "json",
+		                colModel: [
+		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
+		                    { label: 'Card Type', name: 'cardType', align: 'center', editable: true, sortable: true }
+		                ],
+		                rowNum: 15,
+		                rowList: [10, 20, 30],
+		                viewrecords: true,
+		                loadonce: true,		                
+		                height: 360,
+		                width: 500,
+		                sortname: 'id',
+		                sortorder: 'asc',
+		                pager: '#cardtypeListPager',
+		                onSelectRow: function(id) {
+		                	if(id && id!==lastSel){ 
+		                        $('#cardtypeList').restoreRow(lastSel); 
+		                        lastSel=id; 
+		                     }
+		                     $('#cardtypeList').editRow(id, true); 
+		                },
+		                loadComplete: function(data) {
+		                    if ($("#cardtypeList").jqGrid('getGridParam','datatype') === "json") {
+		                        setTimeout(function(){
+		                        	$("#cardtypeList").trigger("reloadGrid");
+		                        },100);
+		                    }
+		                }
+		            });
+		            
+		            $("#cardtypeList").jqGrid("navGrid", "#cardtypeListPager", {edit:true, add:false, search: false, afterRefresh: function() {
+        					$('#cardtypeList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            	}}, {}, {}, {});
+
+		            $.extend($.jgrid.edit, {
+		                mtype: "PUT",
+		                closeAfterEdit: true,
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/cardtype/update';
+		                },afterSubmit: function () {
+		            		$("#cardtypeList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            		return [true, '', ''];
+		            	}		                
+		            });
+		            
+		            $.extend($.jgrid.del, {
+		                mtype: "DELETE",
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/cardtype/delete';
+		                }
+		            });
+		            
+		        });
+				$("#resetCardType").click(function(){
+					$("#cardType").val("");
+					$("#message").html("");
+					$("#cardType").focus();
+				});
+				$("#addCardType").click(function(){
+					$("#message").html("");
+					var cardType = "";
+					cardType = $("#cardType").val();
+					if (cardType.trim() == "") {
+						$("#message").html("<font color=red>" + "Card Type Name is blank!" + " </font>");
+						return;
+					}
+					var data = {"cardType": cardType};
+					$.ajax({
+						type: "POST",
+						url: "http://localhost:8080/PTS/rest/cardtype/create",
+						data: data,
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							if (textStatus == "success") {
+								$("#message").html("<font color=blue>" + "Card Type addeded successfully!" + "</font>");
+								$('#cardtypeList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+							}
+						}
+					});
+					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						if (thrownError == "Conflict") {
+							$("#message").html("<font color=red>Card Type exists!</font>");
+						} else {
+							$("#message").html("<font color=red>" + thrownError + " </font>");
+						}
+					});
+				});
+		</script>
+</head>
+<body>
+	<div id="accordion">
+		<h3>Add Card Type</h3>
+		<div>		
+			<table cellspacing="5" cellpadding="5">
+				<tr>
+					<td><label for="cardType" align="right">Card Type :</label></td>
+					<td align="left"><input type="text" id="cardType" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button type="button" id="addCardType">Add</button><button type="button" id="resetCardType">Reset</button></td>
+				</tr>
+				<tr><td></td><td><span id="message"></span></tr>
+			</table>
+		</div>
+		<h3>List Card Types</h3>
+		<div>
+			<table id="cardtypeList"></table>
+			<div id="cardtypeListPager"></div>
+		</div>
+	</div>
+</body>
+</html>

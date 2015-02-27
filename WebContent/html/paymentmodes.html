@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="ISO-8859-1">
+		<link rel="stylesheet" type="text/css" href="../css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="../css/ui.jqgrid.css">
+		<link rel="stylesheet" type="text/css" href="../css/pts.css">
+		
+		<script src="../js/jquery-1.11.0.min.js"></script>
+		<script src="../js/jquery-ui.min.js"></script>		
+		<script src="../js/i18n/grid.locale-en.js"></script>
+		<script src="../js/jquery.jqGrid.min.js"></script>
+		<script>
+				$("#accordion").accordion({active: 1, heightStyle: "fill"});
+				
+				$(document).ready(function () {
+		            $("#paymentmodesList").jqGrid({
+		                url: '/PTS/rest/paymentmode/paymentmodes',
+		                mtype: "GET",
+		                datatype: "json",
+		                colModel: [
+		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
+		                    { label: 'Payment Mode', name: 'mode', align: 'center', editable: true, sortable: true }
+		                ],
+		                rowNum: 15,
+		                rowList: [10, 20, 30],
+		                viewrecords: true,
+		                loadonce: true,		                
+		                height: 360,
+		                width: 500,
+		                sortname: 'id',
+		                sortorder: 'asc',
+		                pager: '#paymentmodesListPager',
+		                onSelectRow: function(id) {
+		                	if(id && id!==lastSel){ 
+		                        $('#paymentmodesList').restoreRow(lastSel); 
+		                        lastSel=id; 
+		                     }
+		                     $('#paymentmodesList').editRow(id, true); 
+		                },
+		                loadComplete: function(data) {
+		                    if ($("#paymentmodesList").jqGrid('getGridParam','datatype') === "json") {
+		                        setTimeout(function(){
+		                        	$("#paymentmodesList").trigger("reloadGrid");
+		                        },100);
+		                    }
+		                }
+		            });
+		            
+		            $("#paymentmodesList").jqGrid("navGrid", "#paymentmodesListPager", {edit:true, add:false, search: false, afterRefresh: function() {
+        					$('#paymentmodesList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            	}}, {}, {}, {});
+
+		            $.extend($.jgrid.edit, {
+		                mtype: "PUT",
+		                closeAfterEdit: true,
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/paymentmode/update';
+		                },afterSubmit: function () {
+		            		$("#paymentmodesList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            		return [true, '', ''];
+		            	}		                
+		            });
+		            
+		            $.extend($.jgrid.del, {
+		                mtype: "DELETE",
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/paymentmode/delete';
+		                }
+		            });
+		            
+		        });
+				$("#resetPaymentMode").click(function(){
+					$("#paymentMode").val("");
+					$("#message").html("");
+					$("#paymentMode").focus();
+				});
+				$("#addPaymentMode").click(function(){
+					$("#message").html("");
+					var paymentMode = "";
+					paymentMode = $("#paymentMode").val();
+					if (paymentMode.trim() == "") {
+						$("#message").html("<font color=red>" + "Payment Mode is blank!" + " </font>");
+						return;
+					}
+					var data = {"mode": paymentMode};
+					$.ajax({
+						type: "POST",
+						url: "http://localhost:8080/PTS/rest/paymentmode/create",
+						data: data,
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							if (textStatus == "success") {
+								$("#message").html("<font color=blue>" + "Bank addeded successfully!" + "</font>");
+								$('#paymentmodesList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+							}
+						}
+					});
+					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						if (thrownError == "Conflict") {
+							$("#message").html("<font color=red>Payment Mode exists!</font>");
+						} else {
+							$("#message").html("<font color=red>" + thrownError + " </font>");
+						}
+					});
+				});
+		</script>
+</head>
+<body>
+	<div id="accordion">
+		<h3>Add Payment Mode</h3>
+		<div>		
+			<table cellspacing="5" cellpadding="5">
+				<tr>
+					<td><label for="paymentMode" align="right">Payment Mode :</label></td>
+					<td align="left"><input type="text" id="paymentMode" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button type="button" id="addPaymentMode">Add</button><button type="button" id="resetPaymentMode">Reset</button></td>
+				</tr>
+				<tr><td></td><td><span id="message"></span></tr>
+			</table>
+		</div>
+		<h3>List Payment Modes</h3>
+		<div>
+			<table id="paymentmodesList"></table>
+			<div id="paymentmodesListPager"></div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="ISO-8859-1">
+		<link rel="stylesheet" type="text/css" href="../css/jquery-ui.min.css">
+		<link rel="stylesheet" type="text/css" href="../css/ui.jqgrid.css">
+		<link rel="stylesheet" type="text/css" href="../css/pts.css">
+		
+		<script src="../js/jquery-1.11.0.min.js"></script>
+		<script src="../js/jquery-ui.min.js"></script>		
+		<script src="../js/i18n/grid.locale-en.js"></script>
+		<script src="../js/jquery.jqGrid.min.js"></script>
+		<script>
+				
+				
+				$(document).ready(function () {
+					
+					$("#accordion").accordion({active: 1, heightStyle: "fill"});
+					
+					$("#billDate").datepicker();
+					$("#billDueDate").datepicker();
+					
+					$.ajax({
+						type: "GET",
+						url: "/PTS/rest/biller/billers",
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							$("#billersListForBill").empty();
+							$.each(json, function(key, value){
+								var option = "<option value=\"" + value.id + "\">" + value.name + "</option>";
+								$("#billersListForBill").append(option);
+							});
+							var billerId = $("#billersListForBill option:selected").val();
+							$.ajax({
+								type: "GET",
+								url: "/PTS/rest/account/accounts/" + billerId,
+								dataType: "json",
+								success: function(json, textStatus, jqXHR) {
+									$("#accountsForBill").empty();
+									$.each(json, function(key, value){
+										var option = "<option value=\"" + value.id + "\">" + value.accountId + "</option>";
+										$("#accountsForBill").append(option);
+									});
+								}
+							}).fail(function(e){
+								$("#accountsForBill").empty();
+								if (e.responseText == 'Account Not Found!') {
+									$("#message").html("<font color=red>" + e.responseText + " </font>");							
+								} else {
+									$("#message").html("<font color=red>" + e.responseText + " </font>");
+								}
+							});
+						}
+					}).fail(function(e){
+						$("#billersListForBill").empty();
+						if (e.responseText == 'Biller Type Not Found!') {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");
+							
+						} else {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");
+						}
+					});
+					
+					$("#billersListForBill").change(function(){
+						var billerId = $("#billersListForBill option:selected").val();
+						$.ajax({
+							type: "GET",
+							url: "/PTS/rest/account/accounts/" + billerId,
+							dataType: "json",
+							success: function(json, textStatus, jqXHR) {
+								$("#accountsForBill").empty();
+								$.each(json, function(key, value){
+									var option = "<option value=\"" + value.id + "\">" + value.accountId + "</option>";
+									$("#accountsForBill").append(option);
+								});
+							}
+						}).fail(function(e){
+							$("#accountsForBill").empty();
+							if (e.responseText == 'Account Not Found!') {
+								$("#message").html("<font color=red>" + e.responseText + " </font>");							
+							} else {
+								$("#message").html("<font color=red>" + e.responseText + " </font>");
+							}
+						});
+					});
+					
+					$.ajax({
+						type: "GET",
+						url: "/PTS/rest/billtype/billtypes",
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							$("#billTypesForBill").empty();
+							$.each(json, function(key, value){
+								var option = "<option value=\"" + value.id + "\">" + value.type + "</option>";
+								$("#billTypesForBill").append(option);
+							});
+							var billTypeId = $("#billTypesForBill option:selected").val();
+							$.ajax({
+								type: "GET",
+								url: "/PTS/rest/billsubtype/billsubtypes/" + billTypeId,
+								dataType: "json",
+								success: function(json, textStatus, jqXHR) {
+									$("#billSubTypesForBill").empty();
+									$.each(json, function(key, value){
+										var option = "<option value=\"" + value.id + "\">" + value.subType + "</option>";
+										$("#billSubTypesForBill").append(option);
+									});
+								}
+							}).fail(function(e){
+								$("#billSubTypesForBill").empty();
+								if (e.responseText == 'Bill Sub Type Not Found!') {
+									$("#message").html("<font color=red>" + e.responseText + " </font>");							
+								} else {
+									$("#message").html("<font color=red>" + e.responseText + " </font>");
+								}
+							});
+						}
+					}).fail(function(e){
+						$("#billTypesForBill").empty();
+						if (e.responseText == 'Bill Type Not Found!') {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");							
+						} else {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");
+						}
+					});
+					
+					$("#billTypesForBill").change(function(){
+						var billTypeId = $("#billTypesForBill option:selected").val();
+						$.ajax({
+							type: "GET",
+							url: "/PTS/rest/billsubtype/billsubtypes/" + billTypeId,
+							dataType: "json",
+							success: function(json, textStatus, jqXHR) {
+								$("#billSubTypesForBill").empty();
+								$.each(json, function(key, value){
+									var option = "<option value=\"" + value.id + "\">" + value.subType + "</option>";
+									$("#billSubTypesForBill").append(option);
+								});
+							}
+						}).fail(function(e){
+							$("#billSubTypesForBill").empty();
+							if (e.responseText == 'Bill Sub Type Not Found!') {
+								$("#message").html("<font color=red>" + e.responseText + " </font>");							
+							} else {
+								$("#message").html("<font color=red>" + e.responseText + " </font>");
+							}
+						});
+					});
+					
+		            $("#billsList").jqGrid({
+		                url: '/PTS/rest/bill/bills',
+		                mtype: "GET",
+		                datatype: "json",
+		                colModel: [
+		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
+		                    { label: 'Bill Type', name: 'billType', jsonmap: 'billType.type', align: 'center', editable: false, sortable: true, width: 500 },
+		                    { label: 'Bill Sub Type', name: 'billSubType', jsonmap: 'billSubType.subType', align: 'center', editable: false, sortable: true, width: 500 },
+		                    { label: 'Biller', name: 'billerName', jsonmap: 'account.biller.name', align: 'center', editable: true, sortable: true, width: 500 },
+		                    { label: 'Account ID', name: 'accountId', jsonmap: 'account.accountId', align: 'center', editable: true, sortable: true, width: 500 },
+		                    { label: 'Account Number', name: 'accountNumber', jsonmap: 'account.accountNumber', align: 'center', editable: true, sortable: true, width: 500 },
+		                    { label: 'Bill Number', name: 'billNumber', align: 'center', editable: true, sortable: true, width: 500 },
+		                    { label: 'Bill Date', name: 'billDate', align: 'center', editable: true, sortable: true, width: 500, formatter:'date', formatoptions: {newformat:'d/m/Y'}},
+		                    { label: 'Due Date', name: 'dueDate', align: 'center', editable: true, sortable: true, width: 500, formatter:'date', formatoptions: {newformat:'d/m/Y' }},
+		                    { label: 'Amount', name: 'billAmount', align: 'center', editable: true, sortable: true, width: 500 },		                    
+		                    { label: '', name: 'billerId', align: 'center', editable: true, sortable: false, hidden: true }
+		                ],
+		                rowNum: 15,
+		                rowList: [10, 20, 30],
+		                viewrecords: true,
+		                loadonce: true,		                
+		                height: 360,
+		                width: 1000,
+		                sortname: 'id',
+		                sortorder: 'asc',
+		                pager: '#billsListPager',
+		                onSelectRow: function(id) {
+		                	if(id && id!==lastSel){ 
+		                        $('#billsList').restoreRow(lastSel); 
+		                        lastSel=id; 
+		                     }
+		                     $('#billsList').editRow(id, true); 
+		                },
+		                loadComplete: function(data) {
+		                    if ($("#billsList").jqGrid('getGridParam','datatype') === "json") {
+		                        setTimeout(function(){
+		                        	$("#billsList").trigger("reloadGrid");
+		                        },100);
+		                    }
+		                }
+		            });
+		            
+		            $("#billsList").jqGrid("navGrid", "#billsListPager", {edit:true, add:false, search: false, afterRefresh: function() {
+        					$('#billsList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            	}}, {}, {}, {});
+
+		            $.extend($.jgrid.edit, {
+		                mtype: "PUT",
+		                closeAfterEdit: true,
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/bill/update';
+		                },afterSubmit: function () {
+		            		$("#billsList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+		            		return [true, '', ''];
+		            	}		                
+		            });
+		            
+		            $.extend($.jgrid.del, {
+		                mtype: "DELETE",
+		                onclickSubmit: function (params) {
+		                    params.url = '/PTS/rest/bill/delete';
+		                }
+		            });
+		            
+		        });
+				$("#resetBill").click(function(){
+					$("#billNumber").val("");
+					$("#billDate").val("");
+					$("#billDueDate").val("");
+					$("#billAmount").val("");
+					$("#message").html("");
+					$("#billNumber").focus();
+				});
+				$("#addBill").click(function(){
+					$("#message").html("");
+					var billTypeId = $("#billTypesForBill option:selected").val();
+					var billSubTypeId = $("#billSubTypesForBill option:selected").val();
+					var billerId = $("#billersListForBill option:selected").val();
+					var accountId = $("#accountsForBill option:selected").val();
+					var billNumber = $("#billNumber").val();
+					var billDate = $("#billDate").val();
+					var billDueDate = $("#billDueDate").val();
+					var billAmount = $("#billAmount").val();
+					if (billNumber.trim() == "") {
+						$("#message").html("<font color=red>" + "Bill Numnber is blank!" + " </font>");
+						return;
+					}
+					var data = {"billTypeId": billTypeId, "billSubTypeId": billSubTypeId, "billerId": billerId, "accountId": accountId, "billNumber": billNumber, "billDate": billDate, "billDueDate": billDueDate, "billAmount": billAmount};
+					$.ajax({
+						type: "POST",
+						url: "http://localhost:8080/PTS/rest/bill/create",
+						data: data,
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							if (textStatus == "success") {
+								$("#message").html("<font color=blue>" + "Bill added successfully!" + "</font>");
+								$('#billsList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+							}
+						}
+					});
+					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						$("#message").html("<font color=red>" + jqXHR.responseText + " </font>");
+					});
+				});
+		</script>
+</head>
+<body>
+	<div id="accordion">
+		<h3>Add Bill</h3>
+		<div>		
+			<table cellspacing="5" cellpadding="5">
+				<tr>
+					<td><label for="billTypesForBill" align="right">Bill Type</label></td>
+					<td align="left">: <select id="billTypesForBill" style="width: 197px;"></select></td>
+				</tr>
+				<tr>
+					<td><label for="billSubTypesForBill" align="right">Bill Sub Type</label></td>
+					<td align="left">: <select id="billSubTypesForBill" style="width: 197px;"></select></td>
+				</tr>
+				<tr>
+					<td><label for="billersListForBill" align="right">Biller</label></td>
+					<td align="left">: <select id="billersListForBill" style="width: 196px;"></select></td>
+				</tr>
+				<tr>
+					<td><label for="accountsForBill" align="right">Account</label></td>
+					<td align="left">: <select id="accountsForBill" style="width: 196px;"></select></td>
+				</tr>
+				<tr>
+					<td><label for="billNumber" align="right">Bill Number</label></td>
+					<td align="left">: <input type="text" id="billNumber" /></td>
+				</tr>
+				<tr>
+					<td><label for="billDate" align="right">Bill Date</label></td>
+					<td align="left">: <input type="text" id="billDate" /></td>
+				</tr>
+				<tr>
+					<td><label for="billDueDate" align="right">Due Date</label></td>
+					<td align="left">: <input type="text" id="billDueDate" /></td>
+				</tr>
+				<tr>
+					<td><label for="billAmount" align="right">Amount</label></td>
+					<td align="left">: <input type="text" id="billAmount" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button type="button" id="addBill">Add</button><button type="button" id="resetBill">Reset</button></td>
+				</tr>
+				<tr><td></td><td><span id="message"></span></tr>
+			</table>
+		</div>
+		<h3>List Bills</h3>
+		<div>
+			<table id="billsList"></table>
+			<div id="billsListPager"></div>
+		</div>
+	</div>
+</body>
+</html>
