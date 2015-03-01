@@ -56,17 +56,24 @@
 		                closeAfterEdit: true,
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/biller/update';
-		                },afterSubmit: function () {
+		                },
+		                afterSubmit: function () {
 		            		$("#billersList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
-		            	}		                
+		            	},
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		            $.extend($.jgrid.del, {
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/biller/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -80,6 +87,7 @@
 					var billerName = $("#billerName").val();
 					if (billerName.trim() == "") {
 						$("#message").html("<font color=red>" + "Biller Name is blank!" + " </font>");
+						$("#billerName").focus();
 						return;
 					}
 					var data = {"name": billerName};
@@ -90,7 +98,7 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Biller addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Biller added successfully!" + "</font>");
 								$("#billerName").val("");
 								$("#billerName").focus();
 								$('#billersList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
@@ -98,8 +106,9 @@
 						}
 					});
 					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						$("#billerName").focus();
 						if (thrownError == "Conflict") {
-							$("#message").html("<font color=red>Biller exists!</font>");
+							$("#message").html("<font color=red>Biller exists!</font>");							
 						} else {
 							$("#message").html("<font color=red>" + thrownError + " </font>");
 						}
@@ -111,14 +120,14 @@
 	<div id="accordion">
 		<h3>Add Biller</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="billerName" align="right">Biller Name :</label></td>
+					<td><label for="billerName">Biller Name :</label></td>
 					<td align="left"><input type="text" id="billerName" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addbiller">Add</button><button type="button" id="resetbiller">Reset</button></td>
+					<td align="center"><button type="button" id="addbiller">Add</button>&nbsp;&nbsp;<button type="button" id="resetbiller">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

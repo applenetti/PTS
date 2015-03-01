@@ -23,13 +23,12 @@ public class BillSubType {
 	@Column(name = "id", nullable = false)
 	private int id;
 	
-	@Column(name = "subtype", nullable = false, unique = true)
-	private String subType;
-	
-	
 	@ManyToOne
 	@JoinColumn(name="billtype_id")
 	private BillType billType;
+	
+	@Column(name = "billsubtype", nullable = false)
+	private String billSubType;
 
 	public int getId() {
 		return id;
@@ -37,14 +36,6 @@ public class BillSubType {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-	
-	public String getSubType() {
-		return subType;
-	}
-
-	public void setSubType(String subType) {
-		this.subType = subType;
 	}
 
 	public BillType getBillType() {
@@ -55,8 +46,16 @@ public class BillSubType {
 		this.billType = billType;
 	}
 
+	public String getBillSubType() {
+		return billSubType;
+	}
+
+	public void setBillSubType(String billSubType) {
+		this.billSubType = billSubType;
+	}
+
 	@Override
 	public String toString() {
-		return "id: " + id + ", subType: " + subType;
+		return "id: " + id + ", billSubType: " + billSubType;
 	}
 }

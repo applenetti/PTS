@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.BillBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.BillException;
 import com.pts.pojo.Bill;
 
 @Path("/bill")
@@ -53,11 +54,13 @@ public class BillService {
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createBill(@FormParam("billTypeId") int billTypeId, @FormParam("billSubTypeId") int billSubTypeId, @FormParam("billerId") int billerId, @FormParam("accountId") int accountId,
+	public Response createBill(@FormParam("billerId") int billerId, @FormParam("accountId") int accountId, @FormParam("statusId") int statusId,
 			@FormParam("billNumber") String billNumber, @FormParam("billDate") Date billDate, @FormParam("billDueDate") Date billDueDate, @FormParam("billAmount") double billAmount) {
 		Bill bill = null;
 		try {
-			bill = new BillBusiness().createBill(billTypeId, billSubTypeId, billerId, accountId, billNumber, billDate, billDueDate, billAmount);
+			bill = new BillBusiness().createBill(billerId, accountId, statusId,
+					billNumber, billDate, billDueDate,
+					billAmount);
 		} catch (ApplicationException e) {
 			return Response.status(Status.CONFLICT)
 					.entity(e.getErrorMessage()).build();
@@ -68,17 +71,19 @@ public class BillService {
 	@PUT
 	@Path("/update")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateBill(@FormParam("id") int id, @FormParam("billId") String billId,
-			@FormParam("billNumber") String billNumber,
-			@FormParam("username") String username,
-			@FormParam("password") String password, @FormParam("bId") int billerId, @FormParam("name") String billerName) {
+	public Response updateBill(@FormParam("id") int id, @FormParam("billerId") int billerId, @FormParam("accountId") int accountId, @FormParam("statusId") int statusId,
+			@FormParam("billNumber") String billNumber, @FormParam("billDate") Date billDate, @FormParam("billDueDate") Date billDueDate, @FormParam("billAmount") double billAmount) {
 		Bill bill = null;
 		try {
-			bill = new BillBusiness().updateBill(id, billId,
-					billNumber, username, password, billerId);
+			bill = new BillBusiness().updateBill(id, billerId, accountId, statusId,
+					billNumber, billDate, billDueDate,
+					billAmount);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND)
-					.entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == BillException.EXISTS.getErrorMessage()) {
+				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == BillException.NOTFOUND.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(bill).build();
 	}
@@ -91,8 +96,7 @@ public class BillService {
 		try {
 			isDeleted = new BillBusiness().deleteBill(billId);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND)
-					.entity(e.getErrorMessage()).build();
+			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
 		}
 		return Response.status(Status.OK).entity(isDeleted).build();
 	}

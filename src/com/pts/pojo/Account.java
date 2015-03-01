@@ -21,23 +21,31 @@ public class Account {
 	@SequenceGenerator(name = "sq_id", sequenceName = "account_id", allocationSize=1)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_id")
 	@Column(name = "id", nullable = false)
-	private int id;
-	
-	@Column(length = 20, nullable = false, unique = true)
-	private String accountId;
-	
-	@Column(length = 20, nullable = false, unique = true)
-	private String accountNumber;
-	
-	@Column(length = 20, nullable = false)
-	private String username;
-	
-	@Column(length = 20, nullable = false)
-	private String password;
+	private int id;	
 	
 	@OneToOne
 	@JoinColumn(name="biller_id")
-	private Biller biller;	
+	private Biller biller;
+	
+	@OneToOne
+	@JoinColumn(name="billtype_id")
+	private BillType billType;
+	
+	@OneToOne
+	@JoinColumn(name="billsubtype_id")
+	private BillSubType billSubType;
+	
+	@Column
+	private String accountId;
+	
+	@Column
+	private String mobileNumber;
+	
+	@Column
+	private String username;
+	
+	@Column
+	private String email;	
 
 	public int getId() {
 		return id;
@@ -46,7 +54,31 @@ public class Account {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+
+	public Biller getBiller() {
+		return biller;
+	}
+
+	public void setBiller(Biller biller) {
+		this.biller = biller;
+	}
+
+	public BillType getBillType() {
+		return billType;
+	}
+
+	public void setBillType(BillType billType) {
+		this.billType = billType;
+	}
+
+	public BillSubType getBillSubType() {
+		return billSubType;
+	}
+
+	public void setBillSubType(BillSubType billSubType) {
+		this.billSubType = billSubType;
+	}
+
 	public String getAccountId() {
 		return accountId;
 	}
@@ -55,12 +87,12 @@ public class Account {
 		this.accountId = accountId;
 	}
 
-	public String getAccountNumber() {
-		return accountNumber;
+	public String getMobileNumber() {
+		return mobileNumber;
 	}
 
-	public void setAccountNumber(String accountNumber) {
-		this.accountNumber = accountNumber;
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
 	}
 
 	public String getUsername() {
@@ -71,20 +103,12 @@ public class Account {
 		this.username = username;
 	}
 
-	public String getPassword() {
-		return password;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public Biller getBiller() {
-		return biller;
-	}
-
-	public void setBiller(Biller biller) {
-		this.biller = biller;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

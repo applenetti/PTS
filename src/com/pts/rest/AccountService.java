@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.AccountBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.AccountException;
 import com.pts.pojo.Account;
 
 @Path("/account")
@@ -48,7 +49,7 @@ public class AccountService {
 		}
 		return Response.status(Status.OK).entity(accounts).build();
 	}
-	
+
 	@GET
 	@Path("/accounts/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -66,17 +67,20 @@ public class AccountService {
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createAccount(@FormParam("accountId") String accountId,
-			@FormParam("accountNumber") String accountNumber,
+	public Response createAccount(@FormParam("billerId") int billerId,
+			@FormParam("billTypeId") int billTypeId,
+			@FormParam("billSubTypeId") int billSubTypeId,
+			@FormParam("accountId") String accountId,
+			@FormParam("mobileNumber") String mobileNumber,
 			@FormParam("username") String username,
-			@FormParam("password") String password, @FormParam("billerId") int billerId) {
+			@FormParam("email") String email) {
 		Account account = null;
 		try {
-			account = new AccountBusiness().createAccount(accountId,
-					accountNumber, username, password, billerId);
+			account = new AccountBusiness().createAccount(billerId, billTypeId,
+					billSubTypeId, accountId, mobileNumber, username, email);
 		} catch (ApplicationException e) {
-			return Response.status(Status.CONFLICT)
-					.entity(e.getErrorMessage()).build();
+			return Response.status(Status.CONFLICT).entity(e.getErrorMessage())
+					.build();
 		}
 		return Response.status(Status.CREATED).entity(account).build();
 	}
@@ -84,17 +88,29 @@ public class AccountService {
 	@PUT
 	@Path("/update")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateAccount(@FormParam("id") int id, @FormParam("accountId") String accountId,
-			@FormParam("accountNumber") String accountNumber,
+	public Response updateAccount(@FormParam("id") int id,
+			@FormParam("billerId") int billerId,
+			@FormParam("billTypeId") int billTypeId,
+			@FormParam("billSubTypeId") int billSubTypeId,
+			@FormParam("accountId") String accountId,
+			@FormParam("mobileNumber") String mobileNumber,
 			@FormParam("username") String username,
-			@FormParam("password") String password, @FormParam("bId") int billerId, @FormParam("name") String billerName) {
+			@FormParam("email") String email) {
 		Account account = null;
 		try {
-			account = new AccountBusiness().updateAccount(id, accountId,
-					accountNumber, username, password, billerId);
+			account = new AccountBusiness().updateAccount(id, billerId,
+					billTypeId, billSubTypeId, accountId, mobileNumber,
+					username, email);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND)
-					.entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == AccountException.EXISTS
+					.getErrorMessage()) {
+				return Response.status(Status.CONFLICT)
+						.entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == AccountException.NOTFOUND
+					.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND)
+						.entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(account).build();
 	}

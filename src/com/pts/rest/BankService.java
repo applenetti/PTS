@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.BankBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.BankException;
 import com.pts.pojo.Bank;
 
 @Path("/bank")
@@ -69,7 +70,7 @@ public class BankService {
 		try {
 			bank = new BankBusiness().createBank(bankName);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
 		}
 		return Response.status(Status.CREATED).entity(bank).build();
 	}
@@ -82,7 +83,11 @@ public class BankService {
 		try {
 			bank = new BankBusiness().updateBank(id, bankName);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == BankException.EXISTS.getErrorMessage()) {
+				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == BankException.NOTFOUND.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(bank).build();
 	}

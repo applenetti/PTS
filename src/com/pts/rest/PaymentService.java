@@ -1,6 +1,7 @@
 package com.pts.rest;
 
 
+import java.sql.Date;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -15,21 +16,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.pts.business.PaymentModeBusiness;
+import com.pts.business.PaymentBusiness;
 import com.pts.exception.ApplicationException;
-import com.pts.exception.PaymentModeException;
-import com.pts.pojo.PaymentMode;
+import com.pts.exception.PaymentException;
+import com.pts.pojo.Payment;
 
-@Path("/paymentmode")
-public class PaymentModeService {
+@Path("/payment")
+public class PaymentService {
 	
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getPaymentMode(@PathParam("id") int id) {
-		PaymentMode paymentMode = null;
+	public Response getPayment(@PathParam("id") int id) {
+		Payment paymentMode = null;
 		try {
-			paymentMode = new PaymentModeBusiness().getPaymentMode(id);
+			paymentMode = new PaymentBusiness().getPayment(id);
 		} catch (ApplicationException e) {
 			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
 		}
@@ -37,12 +38,12 @@ public class PaymentModeService {
 	}
 	
 	@GET
-	@Path("/paymentmodes")
+	@Path("/payments")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getPaymentModes() {
-		List<PaymentMode> paymentModes = null;
+	public Response getPayments() {
+		List<Payment> paymentModes = null;
 		try {
-			paymentModes = new PaymentModeBusiness().getPaymentModes();
+			paymentModes = new PaymentBusiness().getPayments();
 		} catch (ApplicationException e) {
 			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
 		}
@@ -52,10 +53,10 @@ public class PaymentModeService {
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createPaymentMode(@FormParam("mode") String paymentModeName) {
-		PaymentMode paymentMode = null;
+	public Response createPayment(@FormParam("billId") int billId, @FormParam("statusId") int statusId, @FormParam("paymentModeId") int paymentModeId, @FormParam("paymentDate") Date paymentDate, @FormParam("paidAmount") double paidAmount) {
+		Payment paymentMode = null;
 		try {
-			paymentMode = new PaymentModeBusiness().createPaymentMode(paymentModeName);
+			paymentMode = new PaymentBusiness().createPayment(billId, statusId, paymentModeId, paymentDate, paidAmount);
 		} catch (ApplicationException e) {
 			return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
 		}
@@ -65,14 +66,14 @@ public class PaymentModeService {
 	@PUT
 	@Path("/update")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updatePaymentMode(@FormParam("id") int paymentModeId, @FormParam("mode") String paymentModeName) {
-		PaymentMode paymentMode = null;
+	public Response updatePayment(@FormParam("id") int id, @FormParam("billId") int billId, @FormParam("statusId") int statusId, @FormParam("paymentModeId") int paymentModeId, @FormParam("paymentDate") Date paymentDate, @FormParam("paidAmount") double paidAmount) {
+		Payment paymentMode = null;
 		try {
-			paymentMode = new PaymentModeBusiness().updatePaymentMode(paymentModeId, paymentModeName);
+			paymentMode = new PaymentBusiness().updatePayment(id, billId, statusId, paymentModeId, paymentDate, paidAmount);
 		} catch (ApplicationException e) {
-			if (e.getErrorMessage() == PaymentModeException.EXISTS.getErrorMessage()) {
+			if (e.getErrorMessage() == PaymentException.EXISTS.getErrorMessage()) {
 				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
-			} else if (e.getErrorMessage() == PaymentModeException.NOTFOUND.getErrorMessage()) {
+			} else if (e.getErrorMessage() == PaymentException.NOTFOUND.getErrorMessage()) {
 				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
 			}
 		}
@@ -82,10 +83,10 @@ public class PaymentModeService {
 	@DELETE
 	@Path("/delete")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deletePaymentMode(@FormParam("id") int paymentModeId) {
+	public Response deletePayment(@FormParam("id") int paymentModeId) {
 		boolean isDeleted = false;
 		try {
-			isDeleted = new PaymentModeBusiness().deletePaymentMode(paymentModeId);
+			isDeleted = new PaymentBusiness().deletePayment(paymentModeId);
 		} catch (ApplicationException e) {
 			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
 		}

@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.BillSubTypeBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.BillSubTypeException;
 import com.pts.pojo.BillSubType;
 
 @Path("/billsubtype")
@@ -51,10 +52,10 @@ public class BillSubTypeService {
 	@GET
 	@Path("/billsubtypes/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBillSubTypesOfType(@PathParam("id") int typeId) {
+	public Response getBillSubTypesOfType(@PathParam("id") int billTypeId) {
 		List<BillSubType> billSubTypes = null;
 		try {
-			billSubTypes = new BillSubTypeBusiness().getBillSubTypes(typeId);
+			billSubTypes = new BillSubTypeBusiness().getBillSubTypes(billTypeId);
 		} catch (ApplicationException e) {
 			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
 		}
@@ -64,12 +65,12 @@ public class BillSubTypeService {
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createBillSubType(@FormParam("type") int typeId, @FormParam("subType") String billSubTypeDesc) {
+	public Response createBillSubType(@FormParam("billTypeId") int billTypeId, @FormParam("billSubType") String billSubTypeDesc) {
 		BillSubType billSubType = null;
 		try {
-			billSubType = new BillSubTypeBusiness().createBillSubType(typeId, billSubTypeDesc);
+			billSubType = new BillSubTypeBusiness().createBillSubType(billTypeId, billSubTypeDesc);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
 		}
 		return Response.status(Status.CREATED).entity(billSubType).build();
 	}
@@ -77,12 +78,16 @@ public class BillSubTypeService {
 	@PUT
 	@Path("/update")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateBillSubType(@FormParam("id") int id, @FormParam("typeId") int billTypeId, @FormParam("subType") String billSubTypeDesc) {
+	public Response updateBillSubType(@FormParam("id") int id, @FormParam("billTypeId") int billTypeId, @FormParam("billSubType") String billSubTypeDesc) {
 		BillSubType billSubType = null;
 		try {
 			billSubType = new BillSubTypeBusiness().updateBillSubType(id, billTypeId, billSubTypeDesc);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == BillSubTypeException.EXISTS.getErrorMessage()) {
+				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == BillSubTypeException.NOTFOUND.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(billSubType).build();
 	}

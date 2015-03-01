@@ -25,3 +25,16 @@
 #accordion {
 	padding-left: 250px;
 }
+
+table {
+	cellspacing: 5px;
+	cellpadding: 5px;
+}
+
+select {
+	width: 195px;
+}
+
+label {
+	align: right;
+}

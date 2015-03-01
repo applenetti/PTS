@@ -21,8 +21,8 @@ public class BillType {
 	@Column(name = "id", nullable = false)
 	private int id;
 	
-	@Column(name = "type", nullable = false, unique = true)
-	private String type;
+	@Column(name = "billtype", nullable = false, unique = true)
+	private String billType;
 
 	public int getId() {
 		return id;
@@ -31,17 +31,18 @@ public class BillType {
 	public void setId(int id) {
 		this.id = id;
 	}
-
-	public String getType() {
-		return type;
+	
+	public String getBillType() {
+		return billType;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setBillType(String billType) {
+		this.billType = billType;
 	}
 
 	@Override
 	public String toString() {
-		return "id: " + id + ", type: " + type;
-	}
+		return "BillType [id=" + id + ", billType=" + billType + "]";
+	}	
+	
 }

@@ -1,37 +1,42 @@
 package com.pts.dao;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
 import com.pts.exception.ApplicationException;
 import com.pts.exception.BillException;
 import com.pts.exception.SystemError;
 import com.pts.pojo.Account;
+import com.pts.pojo.Bank;
 import com.pts.pojo.Bill;
-import com.pts.pojo.BillSubType;
-import com.pts.pojo.BillType;
 import com.pts.pojo.Biller;
+import com.pts.pojo.Status;
+import com.pts.util.COLUMNS;
 import com.pts.util.HibernateUtil;
 
 public class BillDAO {
-	
+
 	@SuppressWarnings("unchecked")
-	public Bill createBill(int billTypeId, int billSubTypeId, int billerId, int accountId, String billNumber, Date billDate, Date billDueDate, double billAmount) throws ApplicationException {
+	public Bill createBill(int billerId, int accountId, int statusId,
+			String billNumber, Date billDate, Date billDueDate,
+			double billAmount) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
-		Bill bill = null;
-		BillType billType = null;
-		BillSubType billSubType = null;		
 		Biller biller = null;
 		Account account = null;
+		Status status = null;
+		Bill bill = null;
 		List<Bill> bills = null;
 		Query query = null;
 		try {
@@ -45,31 +50,31 @@ public class BillDAO {
 			if (!bills.isEmpty()) {
 				throw new ApplicationException(BillException.EXISTS);
 			} else {
-				billType = new BillType();
-				billType.setId(billTypeId);
-				billSubType = new BillSubType();
-				billSubType.setId(billSubTypeId);
 				biller = new Biller();
 				biller.setId(billerId);
+
 				account = new Account();
 				account.setId(accountId);
-				
+
+				status = new Status();
+				status.setId(statusId);
+
 				bill = new Bill();
 				bill.setBillNumber(billNumber);
 				bill.setBillDate(new java.sql.Date(billDate.getTime()));
-				bill.setDueDate(new java.sql.Date(billDueDate.getTime()));
+				bill.setBillDueDate(new java.sql.Date(billDueDate.getTime()));
 				bill.setBillAmount(billAmount);
-				
-				bill.setBillType(billType);
-				bill.setBillSubType(billSubType);
+
+				bill.setBiller(biller);
 				bill.setAccount(account);
-				
+				bill.setStatus(status);
+
 				session.save(bill);
 				transaction.commit();
 			}
 		} catch (ConstraintViolationException c) {
 			transaction.rollback();
-			throw new ApplicationException(BillException.EXISTS);			
+			throw new ApplicationException(BillException.EXISTS);
 		} catch (HibernateException he) {
 			transaction.rollback();
 			he.printStackTrace();
@@ -79,7 +84,7 @@ public class BillDAO {
 		}
 		return bill;
 	}
-	
+
 	public Bill getBill(int billId) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
@@ -99,7 +104,7 @@ public class BillDAO {
 		}
 		return bill;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<Bill> getBills() throws ApplicationException {
 		SessionFactory sessionFactory = null;
@@ -111,17 +116,18 @@ public class BillDAO {
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
-			Query query = session.createQuery("from Bill as bill left join bill.account acc left join acc.biller");
+			Query query = session
+					.createQuery("from Bill as bill left join bill.account acc left join acc.biller");
 			List<Object[]> tuples = (List<Object[]>) query.list();
 			bills = new ArrayList<Bill>();
-			for(Object[] tuple : tuples) {
-			    bill = (Bill) tuple[0];
-			    account = (Account) tuple[1];
-			    biller = (Biller) tuple[2];
-			    account.setBiller(biller);
-			    bill.setAccount(account);
-			    bills.add(bill);
-			}			
+			for (Object[] tuple : tuples) {
+				bill = (Bill) tuple[0];
+				account = (Account) tuple[1];
+				biller = (Biller) tuple[2];
+				account.setBiller(biller);
+				bill.setAccount(account);
+				bills.add(bill);
+			}
 			if (bills == null || bills.isEmpty()) {
 				throw new ApplicationException(BillException.NOTFOUND);
 			}
@@ -133,13 +139,19 @@ public class BillDAO {
 		}
 		return bills;
 	}
-	
-	public Bill updateBill(int id, String billId, String billNumber, String username, String password, int billerId) throws ApplicationException {
+
+	@SuppressWarnings("unchecked")
+	public Bill updateBill(int id, int billerId, int accountId, int statusId,
+			String billNumber, Date billDate, Date billDueDate,
+			double billAmount) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
-		Bill bill = null;
 		Biller biller = null;
+		Account account = null;
+		Status status = null;
+		Bill bill = null;
+		List<Bill> bills = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -148,13 +160,32 @@ public class BillDAO {
 			if (bill == null) {
 				throw new ApplicationException(BillException.NOTFOUND);
 			}
+			
+			Criteria criteria = session.createCriteria(Bank.class);
+			criteria.add(Restrictions.eq(COLUMNS.BILLNUMBER.getColumn(), billNumber));
+			bills = criteria.list();
+			if (!bills.isEmpty()) {
+				throw new ApplicationException(BillException.EXISTS);
+			}
+
 			biller = new Biller();
 			biller.setId(billerId);
-			/*bill.setBillId(billId);
+
+			account = new Account();
+			account.setId(accountId);
+
+			status = new Status();
+			status.setId(statusId);
+
 			bill.setBillNumber(billNumber);
-			bill.setUsername(username);
-			bill.setPassword(password);
-			bill.setBiller(biller);*/
+			bill.setBillDate(new java.sql.Date(billDate.getTime()));
+			bill.setBillDueDate(new java.sql.Date(billDueDate.getTime()));
+			bill.setBillAmount(billAmount);
+
+			bill.setBiller(biller);
+			bill.setAccount(account);
+			bill.setStatus(status);
+
 			session.update(bill);
 			transaction.commit();
 		} catch (HibernateException he) {
@@ -165,8 +196,8 @@ public class BillDAO {
 		}
 		return bill;
 	}
-	
-	public boolean deleteBill(int billId) throws ApplicationException {
+
+	public boolean deleteBill(int id) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
@@ -175,7 +206,7 @@ public class BillDAO {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
-			bill = (Bill) session.get(Bill.class, billId);
+			bill = (Bill) session.get(Bill.class, id);
 			if (bill == null) {
 				throw new ApplicationException(BillException.NOTFOUND);
 			}
@@ -189,5 +220,5 @@ public class BillDAO {
 		}
 		return true;
 	}
-	
+
 }

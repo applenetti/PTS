@@ -124,6 +124,12 @@ public class BillerDAO {
 			if (biller == null) {
 				throw new ApplicationException(BillerException.NOTFOUND);
 			}
+			Criteria criteria = session.createCriteria(Biller.class);
+			criteria.add(Restrictions.eq(COLUMNS.NAME.getColumn(), billerName));
+			List<?> billers = criteria.list();
+			if (!billers.isEmpty()) {
+				throw new ApplicationException(BillerException.EXISTS);
+			}
 			biller.setName(billerName);
 			session.update(biller);
 			transaction.commit();

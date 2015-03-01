@@ -30,10 +30,10 @@ public class BillSubTypeBusiness {
 		return billers;
 	}
 	
-	public List<BillSubType> getBillSubTypes(int typeId) throws ApplicationException {
+	public List<BillSubType> getBillSubTypes(int billTypeId) throws ApplicationException {
 		List<BillSubType> billers = null;
 		try {
-			billers = new BillSubTypeDAO().getBillSubTypes(typeId);
+			billers = new BillSubTypeDAO().getBillSubTypes(billTypeId);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;	
@@ -41,10 +41,10 @@ public class BillSubTypeBusiness {
 		return billers;
 	}
 
-	public BillSubType createBillSubType(int typeId, String billSubTypeDesc) throws ApplicationException {
+	public BillSubType createBillSubType(int billTypeId, String billSubTypeDesc) throws ApplicationException {
 		BillSubType biller = null;
 		try {
-			biller = new BillSubTypeDAO().createBillSubType(typeId, billSubTypeDesc);
+			biller = new BillSubTypeDAO().createBillSubType(billTypeId, billSubTypeDesc);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;
@@ -63,10 +63,10 @@ public class BillSubTypeBusiness {
 		return biller;
 	}
 
-	public boolean deleteBillSubType(int id) throws ApplicationException {
+	public boolean deleteBillSubType(int billSubTypeId) throws ApplicationException {
 		boolean isDeleted = false;
 		try {
-			isDeleted = new BillSubTypeDAO().deleteBillSubType(id);
+			isDeleted = new BillSubTypeDAO().deleteBillSubType(billSubTypeId);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;

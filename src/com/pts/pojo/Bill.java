@@ -1,6 +1,5 @@
 package com.pts.pojo;
 
-
 import java.sql.Date;
 
 import javax.persistence.Access;
@@ -15,39 +14,38 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-
 @Entity
 @Table(name = "bill")
 @Access(value = AccessType.FIELD)
 public class Bill {
-	
+
 	@Id
-	@SequenceGenerator(name = "sq_id", sequenceName = "bill_id", allocationSize=1)
+	@SequenceGenerator(name = "sq_id", sequenceName = "bill_id", allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_id")
 	@Column(name = "id", nullable = false)
 	private int id;
-	
+
 	@ManyToOne
-	@JoinColumn(name="billtype_id")
-	private BillType billType;
-	
+	@JoinColumn(name = "biller_id")
+	private Biller biller;
+
 	@ManyToOne
-	@JoinColumn(name="billsubtype_id")
-	private BillSubType billSubType;
-	
-	@ManyToOne
-	@JoinColumn(name="account_id")
+	@JoinColumn(name = "account_id")
 	private Account account;
-	
+
+	@ManyToOne
+	@JoinColumn(name = "status_id")
+	private Status status;
+
 	@Column(name = "billnumber", nullable = false, unique = true)
 	private String billNumber;
-	
+
 	@Column(name = "billdate", nullable = false, unique = false)
 	private Date billDate;
-	
+
 	@Column(name = "duedate", nullable = false, unique = false)
-	private Date dueDate;
-	
+	private Date billDueDate;
+
 	@Column(name = "amount", nullable = false, unique = false)
 	private double billAmount;
 
@@ -59,20 +57,12 @@ public class Bill {
 		this.id = id;
 	}
 
-	public BillType getBillType() {
-		return billType;
+	public Biller getBiller() {
+		return biller;
 	}
 
-	public void setBillType(BillType billType) {
-		this.billType = billType;
-	}
-
-	public BillSubType getBillSubType() {
-		return billSubType;
-	}
-
-	public void setBillSubType(BillSubType billSubType) {
-		this.billSubType = billSubType;
+	public void setBiller(Biller biller) {
+		this.biller = biller;
 	}
 
 	public Account getAccount() {
@@ -81,6 +71,14 @@ public class Bill {
 
 	public void setAccount(Account account) {
 		this.account = account;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public String getBillNumber() {
@@ -99,12 +97,12 @@ public class Bill {
 		this.billDate = billDate;
 	}
 
-	public Date getDueDate() {
-		return dueDate;
+	public Date getBillDueDate() {
+		return billDueDate;
 	}
 
-	public void setDueDate(Date dueDate) {
-		this.dueDate = dueDate;
+	public void setBillDueDate(Date billDueDate) {
+		this.billDueDate = billDueDate;
 	}
 
 	public double getBillAmount() {
@@ -117,10 +115,10 @@ public class Bill {
 
 	@Override
 	public String toString() {
-		return "Bill [id=" + id + ", billNumber=" + billNumber + ", dueDate="
-				+ dueDate + ", billAmount=" + billAmount + "]";
+		return "Bill [id=" + id + ", biller=" + biller + ", account=" + account
+				+ ", status=" + status + ", billNumber=" + billNumber
+				+ ", billDate=" + billDate + ", billDueDate=" + billDueDate
+				+ ", billAmount=" + billAmount + "]";
 	}
-	
-	
-	
+
 }

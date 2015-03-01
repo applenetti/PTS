@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.CardTypeBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.CardTypeException;
 import com.pts.pojo.CardType;
 
 @Path("/cardtype")
@@ -69,7 +70,11 @@ public class CardTypeService {
 		try {
 			cardType = new CardTypeBusiness().updateCardType(id, cardTypeDesc);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == CardTypeException.EXISTS.getErrorMessage()) {
+				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == CardTypeException.NOTFOUND.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(cardType).build();
 	}

@@ -103,6 +103,9 @@
 		                },afterSubmit: function () {
 		            		$("#cardsList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -110,7 +113,10 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/card/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -136,7 +142,7 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Card addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Card added successfully!" + "</font>");
 								$('#cardsList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
@@ -155,22 +161,22 @@
 	<div id="accordion">
 		<h3>Add Card</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="cardType" align="right">Card Type :</label></td>
-					<td align="left"><select id="cardTypesForCard" style="width:200px;"></select></td>
+					<td><label for="cardType">Card Type :</label></td>
+					<td align="left"><select id="cardTypesForCard"></select></td>
 				</tr>
 				<tr>
-					<td><label for="banksForCardTypes" align="right">Bank :</label></td>
-					<td align="left"><select id="banksForCardTypes" style="width:200px;"></select></td>
+					<td><label for="banksForCardTypes">Bank :</label></td>
+					<td align="left"><select id="banksForCardTypes"></select></td>
 				</tr>
 				<tr>
-					<td><label for="cardNumber" align="right">Card Name :</label></td>
+					<td><label for="cardNumber">Card Number :</label></td>
 					<td align="left"><input type="text" id="cardNumber" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addCard">Add</button><button type="button" id="resetCard">Reset</button></td>
+					<td align="center"><button type="button" id="addCard">Add</button>&nbsp;&nbsp;<button type="button" id="resetCard">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

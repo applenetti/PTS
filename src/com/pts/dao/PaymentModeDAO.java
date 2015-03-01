@@ -91,11 +91,13 @@ public class PaymentModeDAO {
 		return paymentModes;
 	}
 	
-	public PaymentMode updatePaymentMode(int paymentModeId, String paymentModeName) throws ApplicationException {
+	@SuppressWarnings("unchecked")
+	public PaymentMode updatePaymentMode(int paymentModeId, String paymentModeDesc) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
 		PaymentMode paymentMode = null;
+		List<PaymentMode> paymentModes = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -104,7 +106,13 @@ public class PaymentModeDAO {
 			if (paymentMode == null) {
 				throw new ApplicationException(PaymentModeException.NOTFOUND);
 			}
-			paymentMode.setMode(paymentModeName);
+			Criteria criteria = session.createCriteria(PaymentMode.class);
+			criteria.add(Restrictions.eq(COLUMNS.MODE.getColumn(), paymentModeDesc));
+			paymentModes = criteria.list();
+			if (!paymentModes.isEmpty()) {
+				throw new ApplicationException(PaymentModeException.EXISTS);
+			}
+			paymentMode.setMode(paymentModeDesc);
 			session.update(paymentMode);
 			transaction.commit();
 		} catch (HibernateException he) {

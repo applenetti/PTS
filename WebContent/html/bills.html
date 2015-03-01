@@ -25,12 +25,12 @@
 						url: "/PTS/rest/biller/billers",
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
-							$("#billersListForBill").empty();
+							$("#billersForBill").empty();
 							$.each(json, function(key, value){
 								var option = "<option value=\"" + value.id + "\">" + value.name + "</option>";
-								$("#billersListForBill").append(option);
+								$("#billersForBill").append(option);
 							});
-							var billerId = $("#billersListForBill option:selected").val();
+							var billerId = $("#billersForBill option:selected").val();
 							$.ajax({
 								type: "GET",
 								url: "/PTS/rest/account/accounts/" + billerId,
@@ -52,7 +52,7 @@
 							});
 						}
 					}).fail(function(e){
-						$("#billersListForBill").empty();
+						$("#billersForBill").empty();
 						if (e.responseText == 'Biller Type Not Found!') {
 							$("#message").html("<font color=red>" + e.responseText + " </font>");
 							
@@ -61,8 +61,8 @@
 						}
 					});
 					
-					$("#billersListForBill").change(function(){
-						var billerId = $("#billersListForBill option:selected").val();
+					$("#billersForBill").change(function(){
+						var billerId = $("#billersForBill option:selected").val();
 						$.ajax({
 							type: "GET",
 							url: "/PTS/rest/account/accounts/" + billerId,
@@ -84,69 +84,6 @@
 						});
 					});
 					
-					$.ajax({
-						type: "GET",
-						url: "/PTS/rest/billtype/billtypes",
-						dataType: "json",
-						success: function(json, textStatus, jqXHR) {
-							$("#billTypesForBill").empty();
-							$.each(json, function(key, value){
-								var option = "<option value=\"" + value.id + "\">" + value.type + "</option>";
-								$("#billTypesForBill").append(option);
-							});
-							var billTypeId = $("#billTypesForBill option:selected").val();
-							$.ajax({
-								type: "GET",
-								url: "/PTS/rest/billsubtype/billsubtypes/" + billTypeId,
-								dataType: "json",
-								success: function(json, textStatus, jqXHR) {
-									$("#billSubTypesForBill").empty();
-									$.each(json, function(key, value){
-										var option = "<option value=\"" + value.id + "\">" + value.subType + "</option>";
-										$("#billSubTypesForBill").append(option);
-									});
-								}
-							}).fail(function(e){
-								$("#billSubTypesForBill").empty();
-								if (e.responseText == 'Bill Sub Type Not Found!') {
-									$("#message").html("<font color=red>" + e.responseText + " </font>");							
-								} else {
-									$("#message").html("<font color=red>" + e.responseText + " </font>");
-								}
-							});
-						}
-					}).fail(function(e){
-						$("#billTypesForBill").empty();
-						if (e.responseText == 'Bill Type Not Found!') {
-							$("#message").html("<font color=red>" + e.responseText + " </font>");							
-						} else {
-							$("#message").html("<font color=red>" + e.responseText + " </font>");
-						}
-					});
-					
-					$("#billTypesForBill").change(function(){
-						var billTypeId = $("#billTypesForBill option:selected").val();
-						$.ajax({
-							type: "GET",
-							url: "/PTS/rest/billsubtype/billsubtypes/" + billTypeId,
-							dataType: "json",
-							success: function(json, textStatus, jqXHR) {
-								$("#billSubTypesForBill").empty();
-								$.each(json, function(key, value){
-									var option = "<option value=\"" + value.id + "\">" + value.subType + "</option>";
-									$("#billSubTypesForBill").append(option);
-								});
-							}
-						}).fail(function(e){
-							$("#billSubTypesForBill").empty();
-							if (e.responseText == 'Bill Sub Type Not Found!') {
-								$("#message").html("<font color=red>" + e.responseText + " </font>");							
-							} else {
-								$("#message").html("<font color=red>" + e.responseText + " </font>");
-							}
-						});
-					});
-					
 		            $("#billsList").jqGrid({
 		                url: '/PTS/rest/bill/bills',
 		                mtype: "GET",
@@ -161,7 +98,8 @@
 		                    { label: 'Bill Number', name: 'billNumber', align: 'center', editable: true, sortable: true, width: 500 },
 		                    { label: 'Bill Date', name: 'billDate', align: 'center', editable: true, sortable: true, width: 500, formatter:'date', formatoptions: {newformat:'d/m/Y'}},
 		                    { label: 'Due Date', name: 'dueDate', align: 'center', editable: true, sortable: true, width: 500, formatter:'date', formatoptions: {newformat:'d/m/Y' }},
-		                    { label: 'Amount', name: 'billAmount', align: 'center', editable: true, sortable: true, width: 500 },		                    
+		                    { label: 'Amount', name: 'billAmount', align: 'center', editable: true, sortable: true, width: 500 },
+		                    { label: 'Status', name: 'billStatus', align: 'center', editable: true, sortable: true, width: 500 },
 		                    { label: '', name: 'billerId', align: 'center', editable: true, sortable: false, hidden: true }
 		                ],
 		                rowNum: 15,
@@ -201,6 +139,9 @@
 		                },afterSubmit: function () {
 		            		$("#billsList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -208,24 +149,27 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/bill/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
 				$("#resetBill").click(function(){
 					$("#billNumber").val("");
-					$("#billDate").val("");
-					$("#billDueDate").val("");
 					$("#billAmount").val("");
 					$("#message").html("");
 					$("#billNumber").focus();
 				});
 				$("#addBill").click(function(){
+					
 					$("#message").html("");
 					var billTypeId = $("#billTypesForBill option:selected").val();
 					var billSubTypeId = $("#billSubTypesForBill option:selected").val();
-					var billerId = $("#billersListForBill option:selected").val();
+					var billerId = $("#billersForBill option:selected").val();
 					var accountId = $("#accountsForBill option:selected").val();
+					//var billStatusId = $("#billStatusesForBill option:selected").val();
 					var billNumber = $("#billNumber").val();
 					var billDate = $("#billDate").val();
 					var billDueDate = $("#billDueDate").val();
@@ -234,7 +178,7 @@
 						$("#message").html("<font color=red>" + "Bill Numnber is blank!" + " </font>");
 						return;
 					}
-					var data = {"billTypeId": billTypeId, "billSubTypeId": billSubTypeId, "billerId": billerId, "accountId": accountId, "billNumber": billNumber, "billDate": billDate, "billDueDate": billDueDate, "billAmount": billAmount};
+					var data = {"billTypeId": billTypeId, "billSubTypeId": billSubTypeId, "billerId": billerId, "accountId": accountId, "billNumber": billNumber, "billDate": billDate, "billDueDate": billDueDate, "billAmount": billAmount, "billStatusId": "1"};
 					$.ajax({
 						type: "POST",
 						url: "http://localhost:8080/PTS/rest/bill/create",
@@ -250,6 +194,7 @@
 					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
 						$("#message").html("<font color=red>" + jqXHR.responseText + " </font>");
 					});
+					
 				});
 		</script>
 </head>
@@ -257,42 +202,42 @@
 	<div id="accordion">
 		<h3>Add Bill</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="billTypesForBill" align="right">Bill Type</label></td>
-					<td align="left">: <select id="billTypesForBill" style="width: 197px;"></select></td>
+					<td><label for="billersForBill">Biller</label></td>
+					<td align="left">: <select id="billersForBill"></select></td>
 				</tr>
 				<tr>
-					<td><label for="billSubTypesForBill" align="right">Bill Sub Type</label></td>
-					<td align="left">: <select id="billSubTypesForBill" style="width: 197px;"></select></td>
+					<td><label for="accountsForBill">Account</label></td>
+					<td align="left">: <select id="accountsForBill"></select></td>
 				</tr>
 				<tr>
-					<td><label for="billersListForBill" align="right">Biller</label></td>
-					<td align="left">: <select id="billersListForBill" style="width: 196px;"></select></td>
+					<td><label for="billType">Bill Type</label></td>
+					<td align="left">: <input type="text" id="billType" disabled /></td>
 				</tr>
 				<tr>
-					<td><label for="accountsForBill" align="right">Account</label></td>
-					<td align="left">: <select id="accountsForBill" style="width: 196px;"></select></td>
+					<td><label for="billSubType">Bill Sub Type</label></td>
+					<td align="left">: <input type="text" id="billSubType" disabled /></td>
 				</tr>
 				<tr>
-					<td><label for="billNumber" align="right">Bill Number</label></td>
+					<td><label for="billNumber">Bill Number</label></td>
 					<td align="left">: <input type="text" id="billNumber" /></td>
 				</tr>
 				<tr>
-					<td><label for="billDate" align="right">Bill Date</label></td>
+					<td><label for="billDate">Bill Date</label></td>
 					<td align="left">: <input type="text" id="billDate" /></td>
 				</tr>
 				<tr>
-					<td><label for="billDueDate" align="right">Due Date</label></td>
+					<td><label for="billDueDate">Due Date</label></td>
 					<td align="left">: <input type="text" id="billDueDate" /></td>
 				</tr>
 				<tr>
-					<td><label for="billAmount" align="right">Amount</label></td>
+					<td><label for="billAmount">Amount</label></td>
 					<td align="left">: <input type="text" id="billAmount" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addBill">Add</button><button type="button" id="resetBill">Reset</button></td>
+					<td align="center"><button type="button" id="addBill">Add</button>&nbsp;&nbsp;<button type="button" id="resetBill">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

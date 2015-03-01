@@ -18,7 +18,7 @@ import com.pts.util.HibernateUtil;
 public class BillSubTypeDAO {
 	
 	@SuppressWarnings("unchecked")
-	public BillSubType createBillSubType(int typeId, String billSubTypeDesc) throws ApplicationException {
+	public BillSubType createBillSubType(int billTypeId, String billSubTypeDesc) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
@@ -30,8 +30,8 @@ public class BillSubTypeDAO {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			Query query = session
-					.createQuery("FROM BillSubType b WHERE b.subType = :billSubTypeDesc AND b.billType = :typeId");
-			query.setInteger("typeId", typeId);
+					.createQuery("FROM BillSubType b WHERE b.billSubType = :billSubTypeDesc AND b.billType = :billTypeId");
+			query.setInteger("billTypeId", billTypeId);
 			query.setString("billSubTypeDesc", billSubTypeDesc);
 			billSubTypes = query.list();
 			if (!billSubTypes.isEmpty()) {
@@ -39,9 +39,9 @@ public class BillSubTypeDAO {
 			}
 			billSubType = new BillSubType();
 			billType = new BillType();
-			billType.setId(typeId);
+			billType.setId(billTypeId);
 			billSubType.setBillType(billType);
-			billSubType.setSubType(billSubTypeDesc);
+			billSubType.setBillSubType(billSubTypeDesc);
 			session.save(billSubType);
 			transaction.commit();
 
@@ -98,15 +98,15 @@ public class BillSubTypeDAO {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<BillSubType> getBillSubTypes(int typeId) throws ApplicationException {
+	public List<BillSubType> getBillSubTypes(int billTypeId) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		List<BillSubType> billSubTypes = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
-			Query query = session.createQuery("from BillSubType a where a.id = :typeId");
-			query.setInteger("typeId", typeId);
+			Query query = session.createQuery("from BillSubType a where a.billType = :billTypeId");
+			query.setInteger("billTypeId", billTypeId);
 			billSubTypes = query.list();
 			if (billSubTypes == null || billSubTypes.isEmpty()) {
 				throw new ApplicationException(BillSubTypeException.NOTFOUND);
@@ -120,12 +120,14 @@ public class BillSubTypeDAO {
 		return billSubTypes;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public BillSubType updateBillSubType(int id, int billTypeId, String billSubTypeDesc) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
-		BillSubType billSubType = null;
 		BillType billType = null;
+		BillSubType billSubType = null;
+		List<BillSubType> billSubTypes = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -134,10 +136,17 @@ public class BillSubTypeDAO {
 			if (billSubType == null) {
 				throw new ApplicationException(BillSubTypeException.NOTFOUND);
 			}
+			Query query = session.createQuery("from BillSubType a where a.billType = :billTypeId AND a.billSubType = :billSubType");
+			query.setInteger("billTypeId", billTypeId);
+			query.setString("billSubType", billSubTypeDesc);			
+			billSubTypes = query.list();
+			if (!billSubTypes.isEmpty()) {
+				throw new ApplicationException(BillSubTypeException.EXISTS);
+			}
 			billType = new BillType();
 			billType.setId(billTypeId);
 			billSubType.setBillType(billType);
-			billSubType.setSubType(billSubTypeDesc);
+			billSubType.setBillSubType(billSubTypeDesc);
 			session.update(billSubType);
 			transaction.commit();
 		} catch (HibernateException he) {

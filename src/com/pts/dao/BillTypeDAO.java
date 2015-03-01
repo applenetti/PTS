@@ -29,11 +29,11 @@ public class BillTypeDAO {
 			transaction = session.beginTransaction();
 			
 			Criteria criteria = session.createCriteria(BillType.class);
-			criteria.add(Restrictions.eq(COLUMNS.TYPE.getColumn(), billTypeDesc));
+			criteria.add(Restrictions.eq(COLUMNS.BILLTYPE.getColumn(), billTypeDesc));
 			List<?> billTypes = criteria.list();
 			if (billTypes.isEmpty()) {
 				billType = new BillType();
-				billType.setType(billTypeDesc);
+				billType.setBillType(billTypeDesc);
 				session.save(billType);
 				transaction.commit();
 			} else {
@@ -91,11 +91,13 @@ public class BillTypeDAO {
 		return billTypes;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public BillType updateBillType(int id, String billTypeDesc) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
 		BillType billType = null;
+		List<BillType> billTypes = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -104,7 +106,13 @@ public class BillTypeDAO {
 			if (billType == null) {
 				throw new ApplicationException(BillTypeException.NOTFOUND);
 			}
-			billType.setType(billTypeDesc);
+			Criteria criteria = session.createCriteria(BillType.class);
+			criteria.add(Restrictions.eq(COLUMNS.BILLTYPE.getColumn(), billTypeDesc));
+			billTypes = criteria.list();
+			if (!billTypes.isEmpty()) {
+				throw new ApplicationException(BillTypeException.EXISTS);
+			}
+			billType.setBillType(billTypeDesc);
 			session.update(billType);
 			transaction.commit();
 		} catch (HibernateException he) {

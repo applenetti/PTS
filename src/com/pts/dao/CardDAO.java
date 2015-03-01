@@ -101,11 +101,13 @@ public class CardDAO {
 		return cards;
 	}
 	
-	public Card updateCard(int cardId, String cardName) throws ApplicationException {
+	@SuppressWarnings("unchecked")
+	public Card updateCard(int cardId, String cardNumber) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
 		Card card = null;
+		List<Card> cards = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -114,7 +116,13 @@ public class CardDAO {
 			if (card == null) {
 				throw new ApplicationException(CardException.NOTFOUND);
 			}
-			//card.setType(cardName);
+			Criteria criteria = session.createCriteria(Card.class);
+			criteria.add(Restrictions.eq(COLUMNS.CARDNUMBER.getColumn(), cardNumber));
+			cards = criteria.list();
+			if (!cards.isEmpty()) {
+				throw new ApplicationException(CardException.EXISTS);
+			}
+			card.setCardNumber(cardNumber);
 			session.update(card);
 			transaction.commit();
 		} catch (HibernateException he) {

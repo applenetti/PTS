@@ -41,10 +41,10 @@ public class AccountBusiness {
 		return accounts;
 	}
 
-	public Account createAccount(String accountId, String accountNumber, String username, String password, int billerId) throws ApplicationException {
+	public Account createAccount(int billerId, int billTypeId, int billSubTypeId, String accountId, String mobileNumber, String username, String email) throws ApplicationException {
 		Account account = null;
 		try {
-			account = new AccountDAO().createAccount(accountId, accountNumber, username, password, billerId);
+			account = new AccountDAO().createAccount(billerId, billTypeId, billSubTypeId, accountId, mobileNumber, username, email);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;
@@ -52,10 +52,10 @@ public class AccountBusiness {
 		return account;
 	}
 
-	public Account updateAccount(int id, String accountId, String accountNumber, String username, String password, int billerId) throws ApplicationException {
+	public Account updateAccount(int id, int billerId, int billTypeId, int billSubTypeId, String accountId, String mobileNumber, String username, String email) throws ApplicationException {
 		Account account = null;
 		try {
-			account = new AccountDAO().updateAccount(id, accountId, accountNumber, username, password, billerId);
+			account = new AccountDAO().updateAccount(id, billerId, billTypeId, billSubTypeId, accountId, mobileNumber, username, email);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;

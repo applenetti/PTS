@@ -20,7 +20,7 @@
 		                datatype: "json",
 		                colModel: [
 		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
-		                    { label: 'Type', name: 'type', align: 'center', editable: true, sortable: true }
+		                    { label: 'Bill Type', name: 'billType', align: 'center', editable: true, sortable: true }
 		                ],
 		                rowNum: 15,
 		                rowList: [10, 20, 30],
@@ -59,6 +59,9 @@
 		                },afterSubmit: function () {
 		            		$("#billtypesList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -66,7 +69,10 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/billtype/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -77,13 +83,13 @@
 				});
 				$("#addBillType").click(function(){
 					$("#message").html("");
-					var billType = "";
-					billType = $("#billType").val();
+					var billType = $("#billType").val();
 					if (billType.trim() == "") {
 						$("#message").html("<font color=red>" + "Bill Type is blank!" + " </font>");
+						$("#billType").focus();
 						return;
 					}
-					var data = {"type": billType};
+					var data = {"billType": billType};
 					$.ajax({
 						type: "POST",
 						url: "http://localhost:8080/PTS/rest/billtype/create",
@@ -91,12 +97,15 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Bill Type addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Bill Type added successfully!" + "</font>");
+								$("#billType").val("");
+								$("#billType").focus();
 								$('#billtypesList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
 					});
 					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						$("#billType").focus();
 						if (thrownError == "Conflict") {
 							$("#message").html("<font color=red>Bill Type exists!</font>");
 						} else {
@@ -110,14 +119,14 @@
 	<div id="accordion">
 		<h3>Add Bill Type</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="billType" align="right">Bill Type :</label></td>
-					<td align="left"><input type="text" id="billType" /></td>
+					<td><label for="billType">Bill Type</label></td>
+					<td>: <input type="text" id="billType" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addBillType">Add</button><button type="button" id="resetBillType">Reset</button></td>
+					<td align="center"><button type="button" id="addBillType">Add</button>&nbsp;&nbsp;<button type="button" id="resetBillType">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

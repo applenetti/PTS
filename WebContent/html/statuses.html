@@ -59,6 +59,9 @@
 		                },afterSubmit: function () {
 		            		$("#statusesList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -66,7 +69,10 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/status/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -91,7 +97,7 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Status addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Status added successfully!" + "</font>");
 								$('#statusesList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
@@ -110,14 +116,14 @@
 	<div id="accordion">
 		<h3>Add Status</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="status" align="right">Status Name :</label></td>
+					<td><label for="status">Status Name :</label></td>
 					<td align="left"><input type="text" id="status" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addStatus">Add</button><button type="button" id="resetStatus">Reset</button></td>
+					<td align="center"><button type="button" id="addStatus">Add</button>&nbsp;&nbsp;<button type="button" id="resetStatus">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

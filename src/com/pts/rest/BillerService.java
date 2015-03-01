@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.BillerBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.BillerException;
 import com.pts.pojo.Biller;
 
 @Path("/biller")
@@ -82,7 +83,11 @@ public class BillerService {
 		try {
 			biller = new BillerBusiness().updateBiller(id, billerName);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == BillerException.EXISTS.getErrorMessage()) {
+				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == BillerException.NOTFOUND.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(biller).build();
 	}
@@ -93,7 +98,7 @@ public class BillerService {
 	public Response deleteBiller(@FormParam("id") int id) {
 		boolean isDeleted = false;
 		try {
-			isDeleted = new BillerBusiness().deleteBiller(id);
+			isDeleted = new BillerBusiness().deleteBiller(id);			
 		} catch (ApplicationException e) {
 			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
 		}

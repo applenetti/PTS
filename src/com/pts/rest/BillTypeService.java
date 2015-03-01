@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.BillTypeBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.BillTypeException;
 import com.pts.pojo.BillType;
 
 @Path("/billtype")
@@ -51,12 +52,12 @@ public class BillTypeService {
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createBillType(@FormParam("type") String billTypeDesc) {
+	public Response createBillType(@FormParam("billType") String billTypeDesc) {
 		BillType billType = null;
 		try {
 			billType = new BillTypeBusiness().createBillType(billTypeDesc);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
 		}
 		return Response.status(Status.CREATED).entity(billType).build();
 	}
@@ -64,12 +65,16 @@ public class BillTypeService {
 	@PUT
 	@Path("/update")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateBillType(@FormParam("id") int id, @FormParam("type") String billTypeDesc) {
+	public Response updateBillType(@FormParam("id") int id, @FormParam("billType") String billTypeDesc) {
 		BillType billType = null;
 		try {
 			billType = new BillTypeBusiness().updateBillType(id, billTypeDesc);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == BillTypeException.EXISTS.getErrorMessage()) {
+				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == BillTypeException.NOTFOUND.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(billType).build();
 	}

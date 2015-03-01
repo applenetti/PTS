@@ -14,20 +14,20 @@
 				$("#accordion").accordion({active: 1, heightStyle: "fill"});
 				
 				$(document).ready(function () {
-					
+					// billers for account - start
 					$.ajax({
 						type: "GET",
 						url: "/PTS/rest/biller/billers",
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
-							$("#billersListForAccount").empty();
+							$("#billersForAccount").empty();
 							$.each(json, function(key, value){
 								var option = "<option value=\"" + value.id + "\">" + value.name + "</option>";
-								$("#billersListForAccount").append(option);
+								$("#billersForAccount").append(option);
 							});
 						}
 					}).fail(function(e){
-						$("#billersListForAccount").empty();
+						$("#billersForAccount").empty();
 						if (e.responseText == 'Biller Type Not Found!') {
 							$("#message").html("<font color=red>" + e.responseText + " </font>");
 							
@@ -35,6 +35,73 @@
 							$("#message").html("<font color=red>" + e.responseText + " </font>");
 						}
 					});
+					// billers for account - end
+					
+					// bill types for account - start
+					$.ajax({
+						type: "GET",
+						url: "/PTS/rest/billtype/billtypes",
+						dataType: "json",
+						success: function(json, textStatus, jqXHR) {
+							$("#billTypesForAccount").empty();
+							$.each(json, function(key, value){
+								var option = "<option value=\"" + value.id + "\">" + value.billType + "</option>";
+								$("#billTypesForAccount").append(option);
+							});
+							var billTypeId = $("#billTypesForAccount option:first").val();
+							$.ajax({
+								type: "GET",
+								url: "/PTS/rest/billsubtype/billsubtypes/" + billTypeId,
+								dataType: "json",
+								success: function(json, textStatus, jqXHR) {
+									$("#billSubTypesForAccount").empty();
+									$.each(json, function(key, value){
+										var option = "<option value=\"" + value.id + "\">" + value.billSubType + "</option>";
+										$("#billSubTypesForAccount").append(option);
+									});
+								}
+							}).fail(function(e){
+								$("#billSubTypesForAccount").empty();
+								if (e.responseText == 'Bill Sub Type Not Found!') {
+									$("#message").html("<font color=red>" + e.responseText + " </font>");								
+								} else {
+									$("#message").html("<font color=red>" + e.responseText + " </font>");
+								}
+							});
+						}
+					}).fail(function(e){
+						$("#billTypesForAccount").empty();
+						if (e.responseText == 'Bill Type Not Found!') {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");							
+						} else {
+							$("#message").html("<font color=red>" + e.responseText + " </font>");
+						}
+					});
+					
+					$("#billTypesForAccount").change(function(){
+						$("#message").empty();
+						var billTypeId = $("#billTypesForAccount option:selected").val();
+						$.ajax({
+							type: "GET",
+							url: "/PTS/rest/billsubtype/billsubtypes/" + billTypeId,
+							dataType: "json",
+							success: function(json, textStatus, jqXHR) {
+								$("#billSubTypesForAccount").empty();
+								$.each(json, function(key, value){
+									var option = "<option value=\"" + value.id + "\">" + value.billSubType + "</option>";
+									$("#billSubTypesForAccount").append(option);
+								});
+							}
+						}).fail(function(e){
+							$("#billSubTypesForAccount").empty();
+							if (e.responseText == 'Bill Sub Type Not Found!') {
+								$("#message").html("<font color=red>" + e.responseText + " </font>");								
+							} else {
+								$("#message").html("<font color=red>" + e.responseText + " </font>");
+							}
+						});
+					});
+					// bill types for account - end
 					
 		            $("#accountsList").jqGrid({
 		                url: '/PTS/rest/account/accounts',
@@ -43,9 +110,9 @@
 		                colModel: [
 		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
 		                    { label: 'Account ID', name: 'accountId', align: 'center', editable: true, sortable: true },
-		                    { label: 'Account Number', name: 'accountNumber', align: 'center', editable: true, sortable: true },
+		                    { label: 'Mobile Number', name: 'mobileNumber', align: 'center', editable: true, sortable: true },
 		                    { label: 'User Name', name: 'username', align: 'center', editable: true, sortable: true },
-		                    { label: 'Password', name: 'password', align: 'center', editable: true, sortable: true },
+		                    { label: 'Email', name: 'email', align: 'center', editable: true, sortable: true },
 		                    { label: 'Biller', name: 'name', jsonmap: 'biller.name', align: 'center', editable: true, sortable: true },
 		                    { label: '', name: 'bId', jsonmap: 'biller.id', align: 'center', editable: true, sortable: false, hidden: true }
 		                ],
@@ -86,34 +153,42 @@
 		                },afterSubmit: function () {
 		            		$("#accountsList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
-		            	}		                
+		            	},
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		            $.extend($.jgrid.del, {
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/account/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
 				$("#resetAccount").click(function(){
-					$("#accountNumber").val("");
+					$("#mobileNumber").val("");
 					$("#message").html("");
-					$("#accountNumber").focus();
+					$("#mobileNumber").focus();
 				});
 				$("#addAccount").click(function(){
 					$("#message").html("");
 					var accountId = $("#accountId").val();
-					var accountNumber = $("#accountNumber").val();
+					var mobileNumber = $("#mobileNumber").val();
 					var username = $("#username").val();
-					var password = $("#password").val();
-					var billerId = $("#billersListForAccount option:selected").val();
-					if (accountNumber.trim() == "") {
+					var email = $("#email").val();
+					var billerId = $("#billersForAccount option:selected").val();
+					var billTypeId = $("#billTypesForAccount option:selected").val();
+					var billSubTypeId = $("#billSubTypesForAccount option:selected").val();
+					if (mobileNumber.trim() == "") {
 						$("#message").html("<font color=red>" + "Account Numnber is blank!" + " </font>");
 						return;
 					}
-					var data = {"accountId": accountId, "accountNumber": accountNumber, "username": username, "password": password, "billerId": billerId};
+					var data = {"billerId": billerId, "billTypeId": billTypeId, "billSubTypeId": billSubTypeId, "accountId": accountId, "mobileNumber": mobileNumber, "username": username, "email": email };
 					$.ajax({
 						type: "POST",
 						url: "http://localhost:8080/PTS/rest/account/create",
@@ -121,7 +196,7 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Account addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Account added successfully!" + "</font>");
 								$('#accountsList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
@@ -136,30 +211,38 @@
 	<div id="accordion">
 		<h3>Add Account</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="billersListForAccount" align="right">Biller :</label></td>
-					<td align="left"><select id="billersListForAccount" style="width: 197px;"></select></td>
+					<td><label for="billersForAccount">Biller</label></td>
+					<td>: <select id="billersForAccount"></select></td>
+				</tr>				
+				<tr>
+					<td><label for="billTypesForAccount">Bill Type</label></td>
+					<td>: <select id="billTypesForAccount"></select></td>
 				</tr>
 				<tr>
-					<td><label for="accountId" align="right">Account ID :</label></td>
-					<td align="left"><input type="text" id="accountId" /></td>
+					<td><label for="billSubTypesForAccount">Bill Sub Type</label></td>
+					<td>: <select id="billSubTypesForAccount"></select></td>
 				</tr>
 				<tr>
-					<td><label for="accountNumber" align="right">Account Number :</label></td>
-					<td align="left"><input type="text" id="accountNumber" /></td>
+					<td><label for="accountId">Account ID</label></td>
+					<td>: <input type="text" id="accountId" /></td>
 				</tr>
 				<tr>
-					<td><label for="username" align="right">User Name :</label></td>
-					<td align="left"><input type="text" id="username" /></td>
+					<td><label for="mobileNumber">Mobile Number</label></td>
+					<td>: <input type="text" id="mobileNumber" /></td>
 				</tr>
 				<tr>
-					<td><label for="password" align="right">Password :</label></td>
-					<td align="left"><input type="text" id="password" /></td>
+					<td><label for="username">User Name</label></td>
+					<td>: <input type="text" id="username" /></td>
+				</tr>
+				<tr>
+					<td><label for="email">Email</label></td>
+					<td>: <input type="text" id="email" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addAccount">Add</button><button type="button" id="resetAccount">Reset</button></td>
+					<td align="center"><button type="button" id="addAccount">Add</button>&nbsp;&nbsp;<button type="button" id="resetAccount">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

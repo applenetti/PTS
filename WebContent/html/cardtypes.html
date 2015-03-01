@@ -59,6 +59,9 @@
 		                },afterSubmit: function () {
 		            		$("#cardtypeList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -66,7 +69,10 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/cardtype/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -91,7 +97,7 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Card Type addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Card Type added successfully!" + "</font>");
 								$('#cardtypeList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
@@ -110,14 +116,14 @@
 	<div id="accordion">
 		<h3>Add Card Type</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="cardType" align="right">Card Type :</label></td>
+					<td><label for="cardType">Card Type :</label></td>
 					<td align="left"><input type="text" id="cardType" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addCardType">Add</button><button type="button" id="resetCardType">Reset</button></td>
+					<td align="center"><button type="button" id="addCardType">Add</button>&nbsp;&nbsp;<button type="button" id="resetCardType">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

@@ -31,10 +31,14 @@ public class BillBusiness {
 		return bills;
 	}
 
-	public Bill createBill(int billTypeId, int billSubTypeId, int billerId, int accountId, String billNumber, Date billDate, Date billDueDate, double billAmount) throws ApplicationException {
+	public Bill createBill(int billerId, int accountId, int statusId,
+			String billNumber, Date billDate, Date billDueDate,
+			double billAmount) throws ApplicationException {
 		Bill bill = null;
 		try {
-			bill = new BillDAO().createBill(billTypeId, billSubTypeId, billerId, accountId, billNumber, billDate, billDueDate, billAmount);
+			bill = new BillDAO().createBill(billerId, accountId, statusId,
+					billNumber, billDate, billDueDate,
+					billAmount);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;
@@ -42,10 +46,14 @@ public class BillBusiness {
 		return bill;
 	}
 
-	public Bill updateBill(int id, String billId, String billNumber, String username, String password, int billerId) throws ApplicationException {
+	public Bill updateBill(int id, int billerId, int accountId, int statusId,
+			String billNumber, Date billDate, Date billDueDate,
+			double billAmount) throws ApplicationException {
 		Bill bill = null;
 		try {
-			bill = new BillDAO().updateBill(id, billId, billNumber, username, password, billerId);
+			bill = new BillDAO().updateBill(id, billerId, accountId, statusId,
+					billNumber, billDate, billDueDate,
+					billAmount);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;

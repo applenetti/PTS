@@ -23,9 +23,6 @@ public class Card {
 	@Column(name = "id", nullable = false)
 	private int id;
 	
-	@Column(name="cardnumber", nullable = false, unique = true)
-	private String cardNumber;
-	
 	@ManyToOne
 	@JoinColumn(name="bank_id")
 	private Bank bank;
@@ -33,6 +30,9 @@ public class Card {
 	@ManyToOne
 	@JoinColumn(name="cardtype_id")
 	private CardType cardType;
+	
+	@Column(name="cardnumber", nullable = false, unique = true)
+	private String cardNumber;	
 
 	public int getId() {
 		return id;
@@ -42,14 +42,6 @@ public class Card {
 		this.id = id;
 	}
 	
-	public String getCardNumber() {
-		return cardNumber;
-	}
-
-	public void setCardNumber(String cardNumber) {
-		this.cardNumber = cardNumber;
-	}
-
 	public Bank getBank() {
 		return bank;
 	}
@@ -65,6 +57,14 @@ public class Card {
 	public void setCardType(CardType cardType) {
 		this.cardType = cardType;
 	}
+	
+	public String getCardNumber() {
+		return cardNumber;
+	}
+
+	public void setCardNumber(String cardNumber) {
+		this.cardNumber = cardNumber;
+	}	
 
 	@Override
 	public String toString() {

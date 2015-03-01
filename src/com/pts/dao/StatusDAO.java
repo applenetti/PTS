@@ -111,11 +111,13 @@ public class StatusDAO {
 		return statuss;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Status updateStatus(int id, String statusDesc) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
 		Status status = null;
+		List<Status> statuses = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -123,6 +125,12 @@ public class StatusDAO {
 			status = (Status) session.get(Status.class, id);
 			if (status == null) {
 				throw new ApplicationException(StatusException.NOTFOUND);
+			}
+			Criteria criteria = session.createCriteria(Status.class);
+			criteria.add(Restrictions.eq(COLUMNS.STATUS.getColumn(), statusDesc));
+			statuses = criteria.list();
+			if (!statuses.isEmpty()) {
+				throw new ApplicationException(StatusException.EXISTS);
 			}
 			status.setStatus(statusDesc);
 			session.update(status);

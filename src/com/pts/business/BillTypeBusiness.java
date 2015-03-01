@@ -8,54 +8,54 @@ import com.pts.pojo.BillType;
 
 public class BillTypeBusiness {
 
-	public BillType getBillType(int id) throws ApplicationException {
-		BillType biller = null;
+	public BillType getBillType(int billTypeId) throws ApplicationException {
+		BillType billType = null;
 		try {
-			biller = new BillTypeDAO().getBillType(id);
+			billType = new BillTypeDAO().getBillType(billTypeId);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;	
 		}
-		return biller;
+		return billType;
 	}
 	
 	public List<BillType> getBillTypes() throws ApplicationException {
-		List<BillType> billers = null;
+		List<BillType> billTypes = null;
 		try {
-			billers = new BillTypeDAO().getBillTypes();
+			billTypes = new BillTypeDAO().getBillTypes();
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;	
 		}
-		return billers;
+		return billTypes;
 	}
 
 	public BillType createBillType(String billTypeDesc) throws ApplicationException {
-		BillType biller = null;
+		BillType billType = null;
 		try {
-			biller = new BillTypeDAO().createBillType(billTypeDesc);
+			billType = new BillTypeDAO().createBillType(billTypeDesc);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;
 		}
-		return biller;
+		return billType;
 	}
 
-	public BillType updateBillType(int id, String billTypeDesc) throws ApplicationException {
-		BillType biller = null;
+	public BillType updateBillType(int billTypeId, String billTypeDesc) throws ApplicationException {
+		BillType billType = null;
 		try {
-			biller = new BillTypeDAO().updateBillType(id, billTypeDesc);
+			billType = new BillTypeDAO().updateBillType(billTypeId, billTypeDesc);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;
 		}
-		return biller;
+		return billType;
 	}
 
-	public boolean deleteBillType(int id) throws ApplicationException {
+	public boolean deleteBillType(int billTypeId) throws ApplicationException {
 		boolean isDeleted = false;
 		try {
-			isDeleted = new BillTypeDAO().deleteBillType(id);
+			isDeleted = new BillTypeDAO().deleteBillType(billTypeId);
 		} catch (ApplicationException e) {
 			System.out.println("Error Code: " + e.getErrorCode() + " , Error Message: " + e.getErrorMessage());
 			throw e;

@@ -21,7 +21,7 @@ public class PaymentMode {
 	@Column(name = "id", nullable = false)
 	private int id;
 	
-	@Column(length = 20, nullable = false, unique = true)
+	@Column
 	private String mode;
 
 	public int getId() {

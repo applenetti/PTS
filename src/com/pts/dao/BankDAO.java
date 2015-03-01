@@ -111,11 +111,13 @@ public class BankDAO {
 		return banks;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Bank updateBank(int id, String bankName) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
 		Bank bank = null;
+		List<Bank> banks = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -123,6 +125,12 @@ public class BankDAO {
 			bank = (Bank) session.get(Bank.class, id);
 			if (bank == null) {
 				throw new ApplicationException(BankException.NOTFOUND);
+			}
+			Criteria criteria = session.createCriteria(Bank.class);
+			criteria.add(Restrictions.eq(COLUMNS.NAME.getColumn(), bankName));
+			banks = criteria.list();
+			if (!banks.isEmpty()) {
+				throw new ApplicationException(BankException.EXISTS);
 			}
 			bank.setName(bankName);
 			session.update(bank);

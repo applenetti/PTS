@@ -59,6 +59,9 @@
 		                },afterSubmit: function () {
 		            		$("#banksList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -66,7 +69,10 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/bank/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -81,6 +87,7 @@
 					bankName = $("#bankName").val();
 					if (bankName.trim() == "") {
 						$("#message").html("<font color=red>" + "Bank Name is blank!" + " </font>");
+						$("#bankName").focus();
 						return;
 					}
 					var data = {"name": bankName};
@@ -91,12 +98,14 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Bank addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Bank added successfully!" + "</font>");
+								$("#bankName").focus();
 								$('#banksList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
 					});
 					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						$("#bankName").focus();
 						if (thrownError == "Conflict") {
 							$("#message").html("<font color=red>Biller exists!</font>");
 						} else {
@@ -110,14 +119,14 @@
 	<div id="accordion">
 		<h3>Add Bank</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="bankName" align="right">Bank Name :</label></td>
+					<td><label for="bankName">Bank Name :</label></td>
 					<td align="left"><input type="text" id="bankName" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addBank">Add</button><button type="button" id="resetBank">Reset</button></td>
+					<td align="center"><button type="button" id="addBank">Add</button>&nbsp;&nbsp;<button type="button" id="resetBank">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

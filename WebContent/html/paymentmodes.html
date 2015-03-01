@@ -59,6 +59,9 @@
 		                },afterSubmit: function () {
 		            		$("#paymentmodesList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -66,7 +69,10 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/paymentmode/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -91,7 +97,7 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Bank addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Payment Mode added successfully!" + "</font>");
 								$('#paymentmodesList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
@@ -110,14 +116,14 @@
 	<div id="accordion">
 		<h3>Add Payment Mode</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="paymentMode" align="right">Payment Mode :</label></td>
+					<td><label for="paymentMode">Payment Mode :</label></td>
 					<td align="left"><input type="text" id="paymentMode" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addPaymentMode">Add</button><button type="button" id="resetPaymentMode">Reset</button></td>
+					<td align="center"><button type="button" id="addPaymentMode">Add</button>&nbsp;&nbsp;<button type="button" id="resetPaymentMode">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

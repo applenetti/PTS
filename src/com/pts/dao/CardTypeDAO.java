@@ -91,11 +91,13 @@ public class CardTypeDAO {
 		return cardTypes;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public CardType updateCardType(int id, String cardTypeDesc) throws ApplicationException {
 		SessionFactory sessionFactory = null;
 		Session session = null;
 		Transaction transaction = null;
 		CardType cardType = null;
+		List<CardType> cardTypes = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
@@ -103,6 +105,12 @@ public class CardTypeDAO {
 			cardType = (CardType) session.get(CardType.class, id);
 			if (cardType == null) {
 				throw new ApplicationException(CardTypeException.NOTFOUND);
+			}
+			Criteria criteria = session.createCriteria(CardType.class);
+			criteria.add(Restrictions.eq(COLUMNS.CARDTYPE.getColumn(), cardTypeDesc));
+			cardTypes = criteria.list();
+			if (!cardTypes.isEmpty()) {
+				throw new ApplicationException(CardTypeException.EXISTS);
 			}
 			cardType.setCardType(cardTypeDesc);
 			session.update(cardType);

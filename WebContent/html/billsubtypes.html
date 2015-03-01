@@ -38,7 +38,7 @@
 						success: function(json, textStatus, jqXHR) {
 							$("#billTypes").empty();
 							$.each(json, function(key, value){
-								var option = "<option value=\"" + value.id + "\">" + value.type + "</option>";
+								var option = "<option value=\"" + value.id + "\">" + value.billType + "</option>";
 								$("#billTypes").append(option);
 							});
 						}
@@ -57,9 +57,9 @@
 		                datatype: "json",
 		                colModel: [
 		                    { label: 'ID', name: 'id', align: 'center', key: true, sortable: true },
-		                    { label: 'Type', name: 'type', jsonmap: 'billType.type', align: 'center', editable: false, sortable: true },
-		                    { label: 'Sub Type', name: 'subType', align: 'center', editable: true, sortable: true },
-		                    { label: '', name: 'typeId', jsonmap: 'billType.id', align: 'center', editable: true, sortable: false, hidden: true }
+		                    { label: 'Bill Type', name: 'type', jsonmap: 'billType.billType', align: 'center', editable: false, sortable: true },
+		                    { label: 'Bill Sub Type', name: 'billSubType', align: 'center', editable: true, sortable: true },
+		                    { label: '', name: 'billTypeId', jsonmap: 'billType.id', align: 'center', editable: true, sortable: false, hidden: true }
 		                ],
 		                rowNum: 15,
 		                rowList: [10, 20, 30],
@@ -98,6 +98,9 @@
 		                },afterSubmit: function () {
 		            		$("#billsubtypeList").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 		            		return [true, '', ''];
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
 		            	}		                
 		            });
 		            
@@ -105,7 +108,13 @@
 		                mtype: "DELETE",
 		                onclickSubmit: function (params) {
 		                    params.url = '/PTS/rest/billsubtype/delete';
-		                }
+		                },
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	},
+		            	errorTextFormat: function(error) {
+		            		return error.responseText;
+		            	}
 		            });
 		            
 		        });
@@ -116,15 +125,16 @@
 				});
 				$("#addBillSubType").click(function(){
 					$("#message").html("");
-					var billType = "";
+					var billTypeId = "";
 					var billSubType = "";
-					billType = $("#billTypes option:selected").val();
+					billTypeId = $("#billTypes option:selected").val();
 					billSubType = $("#billSubType").val();
 					if (billSubType.trim() == "") {
 						$("#message").html("<font color=red>" + "Bill Sub Type is blank!" + " </font>");
+						$("#billSubType").focus();
 						return;
 					}
-					var data = {"type": billType, "subType": billSubType};
+					var data = {"billTypeId": billTypeId, "billSubType": billSubType};
 					$.ajax({
 						type: "POST",
 						url: "http://localhost:8080/PTS/rest/billsubtype/create",
@@ -132,12 +142,14 @@
 						dataType: "json",
 						success: function(json, textStatus, jqXHR) {
 							if (textStatus == "success") {
-								$("#message").html("<font color=blue>" + "Bill Sub Type addeded successfully!" + "</font>");
+								$("#message").html("<font color=blue>" + "Bill Sub Type added successfully!" + "</font>");
+								$("#billSubType").focus();
 								$('#billsubtypeList').jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
 							}
 						}
 					});
 					$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+						$("#billSubType").focus();
 						if (thrownError == "Conflict") {
 							$("#message").html("<font color=red>Bill Sub Type exists!</font>");
 						} else {
@@ -151,20 +163,19 @@
 	<div id="accordion">
 		<h3>Add Bill Sub Type</h3>
 		<div>		
-			<table cellspacing="5" cellpadding="5">
+			<table>
 				<tr>
-					<td><label for="billType" align="right">Bill Type :</label></td>
-					<td align="left">
-						<select id="billTypes" style="width: 195px;"></select>
+					<td><label for="billType">Bill Type</label></td>
+					<td>: <select id="billTypes"></select>
 					</td>
 				</tr>
 				<tr>
-					<td><label for="billSubType" align="right">Bill Sub Type :</label></td>
-					<td align="left"><input type="text" id="billSubType" /></td>
+					<td><label for="billSubType">Bill Sub Type</label></td>
+					<td>: <input type="text" id="billSubType" /></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button type="button" id="addBillSubType">Add</button><button type="button" id="resetBillSubType">Reset</button></td>
+					<td align="center"><button type="button" id="addBillSubType">Add</button>&nbsp;&nbsp;<button type="button" id="resetBillSubType">Reset</button></td>
 				</tr>
 				<tr><td></td><td><span id="message"></span></tr>
 			</table>

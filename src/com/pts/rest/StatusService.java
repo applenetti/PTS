@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.pts.business.StatusBusiness;
 import com.pts.exception.ApplicationException;
+import com.pts.exception.StatusException;
 
 @Path("/status")
 public class StatusService {
@@ -81,7 +82,11 @@ public class StatusService {
 		try {
 			status = new StatusBusiness().updateStatus(id, statusDesc);
 		} catch (ApplicationException e) {
-			return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			if (e.getErrorMessage() == StatusException.EXISTS.getErrorMessage()) {
+				return Response.status(Status.CONFLICT).entity(e.getErrorMessage()).build();
+			} else if (e.getErrorMessage() == StatusException.NOTFOUND.getErrorMessage()) {
+				return Response.status(Status.NOT_FOUND).entity(e.getErrorMessage()).build();
+			}
 		}
 		return Response.status(Status.OK).entity(status).build();
 	}
