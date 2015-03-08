@@ -31,12 +31,11 @@ public class BillBusiness {
 		return bills;
 	}
 
-	public Bill createBill(int billerId, int accountId, int statusId,
-			String billNumber, Date billDate, Date billDueDate,
+	public Bill createBill(int billerId, int accountId, String billNumber, Date billDate, Date billDueDate,
 			double billAmount) throws ApplicationException {
 		Bill bill = null;
 		try {
-			bill = new BillDAO().createBill(billerId, accountId, statusId,
+			bill = new BillDAO().createBill(billerId, accountId,
 					billNumber, billDate, billDueDate,
 					billAmount);
 		} catch (ApplicationException e) {

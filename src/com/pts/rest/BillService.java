@@ -54,12 +54,10 @@ public class BillService {
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createBill(@FormParam("billerId") int billerId, @FormParam("accountId") int accountId, @FormParam("statusId") int statusId,
-			@FormParam("billNumber") String billNumber, @FormParam("billDate") Date billDate, @FormParam("billDueDate") Date billDueDate, @FormParam("billAmount") double billAmount) {
+	public Response createBill(@FormParam("billerId") int billerId, @FormParam("accountId") int accountId, @FormParam("billNumber") String billNumber, @FormParam("billDate") Date billDate, @FormParam("billDueDate") Date billDueDate, @FormParam("billAmount") double billAmount) {
 		Bill bill = null;
 		try {
-			bill = new BillBusiness().createBill(billerId, accountId, statusId,
-					billNumber, billDate, billDueDate,
+			bill = new BillBusiness().createBill(billerId, accountId, billNumber, billDate, billDueDate,
 					billAmount);
 		} catch (ApplicationException e) {
 			return Response.status(Status.CONFLICT)

@@ -5,7 +5,8 @@ public enum COLUMNS {
 			"cardNumber"), ACCOUNTID("accountId"), MOBILENUMBER(
 			"mobileNumber"), USERNAME("username"), EMAIL("email"), BILLNUMBER(
 			"billNumber"), BILLID("billId"), BILLDATE("billDate"), BILLDUEDATE("billDuedate"), BILLAMOUNT(
-			"billAmount"), PAIDAMOUNT("paidAmount"), MODE("mode"), PAYMENTDATE("paymentdate"), STATUS("status");
+			"billAmount"), PAIDAMOUNT("paidAmount"), MODE("mode"), PAYMENTDATE("paymentdate"), STATUS("status"),
+			STATUSNEWID("1"), STATUSNEW("New");
 	COLUMNS(String column) {
 		this.column = column;
 	}

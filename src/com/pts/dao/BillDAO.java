@@ -27,7 +27,7 @@ import com.pts.util.HibernateUtil;
 public class BillDAO {
 
 	@SuppressWarnings("unchecked")
-	public Bill createBill(int billerId, int accountId, int statusId,
+	public Bill createBill(int billerId, int accountId,
 			String billNumber, Date billDate, Date billDueDate,
 			double billAmount) throws ApplicationException {
 		SessionFactory sessionFactory = null;
@@ -55,10 +55,16 @@ public class BillDAO {
 
 				account = new Account();
 				account.setId(accountId);
-
-				status = new Status();
-				status.setId(statusId);
-
+				
+				status = (Status) session.createQuery("FROM Status s WHERE s.status = :new").setString("new", COLUMNS.STATUSNEW.getColumn()).uniqueResult();
+				
+				if (status == null) {
+					status = new Status();
+					status.setId(Integer.parseInt(COLUMNS.STATUSNEWID.getColumn()));
+					status.setStatus(COLUMNS.STATUSNEW.getColumn());
+					session.save(status);
+				}
+				
 				bill = new Bill();
 				bill.setBillNumber(billNumber);
 				bill.setBillDate(new java.sql.Date(billDate.getTime()));
@@ -113,18 +119,21 @@ public class BillDAO {
 		Bill bill = null;
 		Account account = null;
 		Biller biller = null;
+		Status status = null;
 		try {
 			sessionFactory = HibernateUtil.INSTANCE.getSessionFactory();
 			session = sessionFactory.openSession();
 			Query query = session
-					.createQuery("from Bill as bill left join bill.account acc left join acc.biller");
+					.createQuery("from Bill as bill left join bill.account acc left join acc.biller left join bill.status");
 			List<Object[]> tuples = (List<Object[]>) query.list();
 			bills = new ArrayList<Bill>();
 			for (Object[] tuple : tuples) {
 				bill = (Bill) tuple[0];
 				account = (Account) tuple[1];
 				biller = (Biller) tuple[2];
+				status = (Status) tuple[3];
 				account.setBiller(biller);
+				bill.setStatus(status);
 				bill.setAccount(account);
 				bills.add(bill);
 			}
