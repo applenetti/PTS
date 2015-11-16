@@ -54,7 +54,6 @@ public class PaymentDAO {
 				
 				payment.setBill(bill);
 				payment.setStatus(status);
-				payment.setMode(mode);
 				
 				session.save(payment);
 				transaction.commit();
@@ -152,7 +151,6 @@ public class PaymentDAO {
 			
 			payment.setBill(bill);
 			payment.setStatus(status);
-			payment.setMode(mode);
 			session.update(payment);
 			transaction.commit();
 		} catch (HibernateException he) {

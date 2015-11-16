@@ -13,6 +13,7 @@ import com.pts.pojo.BillType;
 import com.pts.pojo.Biller;
 import com.pts.pojo.Card;
 import com.pts.pojo.CardType;
+import com.pts.pojo.Payment;
 import com.pts.pojo.PaymentMode;
 import com.pts.pojo.Status;
 
@@ -36,6 +37,7 @@ public enum HibernateUtil {
 						.addAnnotatedClass(Bill.class)
 						.addAnnotatedClass(PaymentMode.class)
 						.addAnnotatedClass(Status.class)
+						.addAnnotatedClass(Payment.class)
 						.buildSessionFactory();
 			}
 		} catch (HibernateException he) {

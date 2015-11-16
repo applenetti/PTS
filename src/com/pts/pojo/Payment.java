@@ -15,7 +15,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "paymentmode")
+@Table(name = "payment")
 @Access(value = AccessType.FIELD)
 public class Payment {
 
